@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme=dark] { --bg:#0A1020; --card:#111A2E; --side:#0C1427; --line:#1F2D4A; --ink:#E8F1FF; --muted:#9BB0CC; --field:#0D1730;
+          --accent:#3DD9F5; --good:#35D49A; --warn:#FFB020; --bad:#FF5C7A; --violet:#A78BFA; --mute:#8FA3BF; --onacc:#06101F;
+          --shadow:0 0 0 1px rgba(61,217,245,.04), 0 12px 32px rgba(0,0,0,.35); }
+  [data-theme=dark] body.teacher { --accent:#35D49A; } [data-theme=dark] body.hr { --accent:#A78BFA; }
+  [data-theme=dark] body.overview_hr, [data-theme=dark] body.overview_academic { --accent:#6EA8FF; }
+  [data-theme=light] { --bg:#EEF3F8; --card:#FFFFFF; --side:#FFFFFF; --line:#D5DEE9; --ink:#14213A; --muted:#53647F; --field:#F3F7FB;
+          --accent:#0A7C9A; --good:#12805C; --warn:#A76500; --bad:#C62847; --violet:#6D4AE0; --mute:#5C6B80; --onacc:#FFFFFF;
+          --shadow:0 1px 3px rgba(20,33,58,.10); }
+  [data-theme=light] body.teacher { --accent:#0F8A5F; } [data-theme=light] body.hr { --accent:#6D4AE0; }
+  [data-theme=light] body.overview_hr, [data-theme=light] body.overview_academic { --accent:#2F63D8; }
+
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; color:var(--ink); font:17px/1.5 'Sarabun',sans-serif; min-height:100vh; background:var(--bg); }
+  [data-theme=dark] body { background:radial-gradient(1000px 500px at 90% -10%, #152C55 0%, transparent 60%), var(--bg); }
+  h1,h2,.val,.big,.ring b,.col em,.btn,.nav,.tab { font-family:'Kanit',sans-serif; font-weight:600; }
+  small { color:var(--muted); }
+  :focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+
+  /* ---------- ปุ่ม / ฟอร์ม ---------- */
+  .btn { font-size:17px; padding:10px 18px; border-radius:10px; border:1px solid var(--accent); cursor:pointer; background:transparent; color:var(--ink); }
+  .btn.main { background:var(--accent); color:var(--onacc); }
+  .btn.main:disabled { opacity:.6; cursor:wait; }
+  .btn.ghost { border-color:var(--line); }
+  .btn.ghost:hover { border-color:var(--accent); }
+  .btn.sm { padding:7px 16px; font-size:16px; }
+  .btn.block { width:100%; }
+  .btn.good { border-color:var(--good); background:var(--good); color:#04140D; }
+  .btn.bad { border-color:var(--bad); color:var(--bad); }
+  .field { display:block; text-align:left; margin-bottom:14px; }
+  .field > span { display:block; color:var(--muted); margin-bottom:5px; }
+  input[type=text], input[type=password], select, textarea { width:100%; padding:11px 14px; font:18px 'Sarabun',sans-serif; color:var(--ink);
+          background:var(--field); border:1px solid var(--line); border-radius:10px; }
+  input:focus, select:focus, textarea:focus { border-color:var(--accent); }
+  textarea { resize:vertical; margin:4px 0 8px; }
+  .showpw { display:flex; align-items:center; gap:8px; margin:-4px 0 14px; color:var(--muted); cursor:pointer; }
+  .showpw input { width:20px; height:20px; }
+  .msg { min-height:1.6em; margin:0 0 10px; color:var(--bad); text-align:left; }
+
+  /* ---------- Login / เปลี่ยนรหัส ---------- */
+  .center { min-height:100vh; display:grid; place-items:center; padding:16px; position:relative; }
+  .corner { position:absolute; top:14px; right:14px; display:flex; gap:8px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; box-shadow:var(--shadow); }
+  .card h2 { margin:0 0 14px; font-size:18px; }
+  .login { width:100%; max-width:430px; padding:30px 28px; text-align:center; }
+  .login .logo { width:64px; height:64px; margin:0 auto 14px; font-size:20px; }
+  .login h1 { margin:0; font-size:26px; line-height:1.25; }
+  .login p.sub { margin:4px 0 22px; color:var(--muted); }
+  .help { margin-top:16px; font-size:15px; color:var(--muted); }
+  .logo { width:44px; height:44px; flex:none; border-radius:50%; border:2px solid var(--accent); display:grid; place-items:center;
+          font:600 14px 'Kanit',sans-serif; color:var(--accent); }
+
+  /* ---------- Shell: เมนูซ้าย 20% + แถบบน ---------- */
+  .app { display:grid; grid-template-columns:minmax(230px,20%) minmax(0,1fr); grid-template-rows:auto 1fr auto;
+         grid-template-areas:"top top" "side main" "bottom bottom"; min-height:100vh; }
+  body.hr .app { grid-template-columns:minmax(230px,20%) minmax(0,1fr) minmax(240px,20%); grid-template-areas:"top top top" "side main right" "bottom bottom bottom"; }
+  .side { grid-area:side; position:sticky; top:var(--topH,0px); height:calc(100vh - var(--topH,0px)); overflow-y:auto; background:var(--side); border-right:1px solid var(--line);
+          display:flex; flex-direction:column; gap:4px; padding:16px 12px; }
+  .sbrand { display:flex; align-items:center; gap:10px; padding:2px 8px 14px; }
+  .sbrand b { display:block; font:600 17px/1.25 'Kanit',sans-serif; }
+  .nav { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; text-align:left; background:transparent;
+         border:0; border-left:4px solid transparent; color:var(--ink); font-size:17px; font-weight:500; padding:10px 12px; border-radius:8px; cursor:pointer; }
+  .nav:hover { background:var(--field); }
+  .nav.on { background:var(--field); border-left-color:var(--accent); color:var(--accent); }
+  .nav.sub { font:400 16px 'Sarabun',sans-serif; padding:7px 12px 7px 30px; }
+  .nav.sub.on { font-weight:600; }
+  .nav .chev { color:var(--muted); font-size:13px; }
+  .badge { min-width:24px; padding:0 8px; border-radius:99px; background:var(--warn); color:#1A1200; font:600 15px 'Sarabun',sans-serif; text-align:center; }
+  .sfoot { margin-top:auto; display:grid; gap:8px; padding-top:14px; border-top:1px solid var(--line); }
+  /* ---------- โหมดคุณกิตติพันธ์ (HR Admin): แถบบนโปร่งใส · แผงแจ้งเตือนขวา · แถบล่าง ---------- */
+  .rightp { grid-area:right; position:sticky; top:var(--topH,0px); height:calc(100vh - var(--topH,0px)); overflow-y:auto; padding:16px 14px;
+            border-left:1px solid var(--line); background:var(--side); display:grid; gap:12px; align-content:start; }
+  .rightp h2 { margin:0; font-size:18px; }
+  .alert { display:block; width:100%; text-align:left; border:1px solid var(--c); border-left-width:5px; border-radius:10px; padding:8px 12px;
+           background:var(--field); cursor:pointer; color:var(--ink); font:400 16px/1.4 'Sarabun',sans-serif; }
+  .alert.bad { --c:var(--bad); } .alert.warn { --c:var(--warn); }
+  .alert b { display:block; } .alert small { display:block; }
+  .modal { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.6); display:grid; place-items:center; padding:16px; }
+  .mbox { max-width:440px; text-align:center; display:grid; gap:16px; }
+  .mbox p { margin:0; font-size:20px; }
+  .hrbrand { display:none; align-items:center; gap:14px; min-width:0; }
+  .logo.big { width:84px; height:84px; font-size:24px; }
+  .hrbrand b { display:block; font:600 22px/1.2 'Kanit',sans-serif; }
+  .greet { display:none; text-align:right; line-height:1.3; }
+  .greet .gh { display:block; font:600 22px 'Kanit',sans-serif; color:var(--accent); }
+  .greet .gn { display:block; font-weight:600; }
+  body.hr .top { background:color-mix(in srgb, var(--card) 35%, transparent); backdrop-filter:blur(8px); min-height:110px; max-height:200px; padding:12px 24px; }
+  body.hr .hrbrand { display:flex; } body.hr .greet { display:block; }
+  body.hr .me, body.hr .sbrand { display:none; }
+  body.hr .bottombar { max-height:100px; min-height:44px; border-top:1px solid var(--line); background:var(--card); display:flex; align-items:center; justify-content:center; padding:6px 16px; }
+  .mini { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+  .mini .calnav { margin-bottom:6px; } .mini .calnav b { font-size:15px; }
+  .mini .cal { gap:2px; } .mini .day { min-height:30px; font-size:14px; padding:2px; border-radius:6px; } .mini .wd { font-size:12px; }
+  .pgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px; }
+  .pcard { display:grid; gap:6px; justify-items:center; text-align:center; cursor:pointer; color:var(--ink); font:inherit; }
+  .avatar { width:72px; height:72px; border-radius:50%; border:2px solid var(--accent); display:grid; place-items:center; flex:none;
+            font:600 26px 'Kanit',sans-serif; color:var(--accent); background:var(--field); }
+  .dl { display:grid; grid-template-columns:minmax(140px,1fr) 2fr; gap:8px 16px; margin:0; }
+  .dl dt { color:var(--muted); } .dl dd { margin:0; font-weight:600; overflow-wrap:anywhere; }
+  img.avatar { object-fit:cover; }
+  .avatar.lg { width:96px; height:96px; font-size:34px; }
+  .upl { border-top:1px dashed var(--line); padding-top:12px; margin-top:6px; display:grid; gap:4px; }
+  .upl input[type=file], .itop input[type=file] { color:var(--muted); font-size:15px; max-width:100%; }
+  .chk { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .chk input { width:20px; height:20px; }
+  details { margin-top:4px; } summary { cursor:pointer; color:var(--muted); padding:6px 0; }
+  .pwshow { display:inline-block; font:600 22px 'Kanit',monospace; letter-spacing:2px; background:var(--field); border:1px dashed var(--accent); border-radius:8px; padding:4px 14px; margin:6px 10px 6px 0; user-select:all; }
+  .top { grid-area:top; position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:10px 18px;
+         background:var(--card); border-bottom:1px solid var(--line); }
+  .burger { display:none; }
+  .pill { border-radius:99px; padding:1px 12px; font-size:15px; border:1px solid var(--c); color:var(--c); white-space:nowrap; }
+  .pill.good { --c:var(--good); } .pill.warn { --c:var(--warn); } .pill.bad { --c:var(--bad); } .pill.mute { --c:var(--mute); }
+  .online i { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--good); margin-right:6px; animation:pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity:.3; } }
+  .clock { color:var(--muted); font-size:15px; white-space:nowrap; }
+  .clock b { color:var(--accent); font-family:'Kanit',sans-serif; font-weight:500; }
+  .spacer { flex:1; }
+  .me { text-align:right; line-height:1.25; }
+  .me b { display:block; }
+  .content { grid-area:main; min-width:0; padding:16px; display:grid; gap:16px; width:100%; max-width:1240px; margin:0 auto; align-content:start; }
+  footer { grid-area:bottom; text-align:center; color:var(--muted); font-size:14px; padding:6px 0 12px; }
+  .scrim { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:15; }
+
+  /* ---------- เนื้อหา ---------- */
+  .row { display:grid; gap:16px; }
+  .hero { grid-template-columns:1.5fr repeat(3,1fr); } .g4 { grid-template-columns:repeat(4,1fr); } .g3 { grid-template-columns:repeat(3,1fr); }
+  .hm { grid-template-columns:1.5fr 1fr; } .g2 { grid-template-columns:1fr 1fr; }
+  .col1 { display:grid; gap:16px; align-content:start; }
+  .span2 { grid-column:span 2; } .wide { grid-column:1/-1; }
+  .heroL { border-left:5px solid var(--accent); display:flex; flex-direction:column; justify-content:center; gap:10px; }
+  .heroL h1 { margin:0; font-size:26px; line-height:1.25; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chips span { background:var(--field); border:1px solid var(--line); border-radius:6px; padding:1px 10px; color:var(--muted); font-size:15px; }
+  .kpi { border-color:color-mix(in srgb,var(--c) 35%,var(--line)); }
+  .kpi .lbl { color:var(--muted); font-size:16px; display:block; }
+  .kpi .val { display:block; font-size:40px; line-height:1.15; color:var(--c); }
+  .kpi small { display:block; }
+  .meter { height:8px; background:var(--field); border-radius:4px; overflow:hidden; margin-top:8px; }
+  .meter i { display:block; height:100%; border-radius:4px; }
+  .cols { display:flex; align-items:flex-end; gap:14px; height:270px; }
+  .col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px; text-align:center; font-size:15px; }
+  .col em { font-style:normal; font-size:17px; }
+  .stack { display:flex; flex-direction:column-reverse; width:100%; max-width:64px; border-radius:6px 6px 0 0; overflow:hidden; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:14px; font-size:15px; color:var(--muted); }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+  .ring { width:150px; height:150px; border-radius:50%; position:relative; margin:0 auto 16px; }
+  .ring::after { content:""; position:absolute; inset:17px; border-radius:50%; background:var(--card); }
+  .ring b { position:absolute; inset:0; z-index:1; display:grid; place-content:center; text-align:center; font-size:32px; line-height:1.1; }
+  .ring b small { font:400 14px 'Sarabun',sans-serif; }
+  .brow { margin-bottom:12px; }
+  .btop { display:flex; justify-content:space-between; gap:8px; }
+  .btop span { color:var(--muted); }
+  .scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:16px; }
+  th { text-align:left; color:var(--muted); font-weight:600; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  td { padding:10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  td.nm { font-weight:600; }
+  .empty { color:var(--muted); padding:14px 0; }
+  .loading { padding:40px; text-align:center; font-size:20px; color:var(--muted); }
+  .loading.err { color:var(--bad); }
+
+  /* หน้าหลักของครู */
+  .big { font-size:44px; line-height:1.1; color:var(--c, var(--accent)); }
+  .calnav { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+  .calnav b { font:600 18px 'Kanit',sans-serif; }
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .cal .wd { text-align:center; color:var(--muted); font-size:14px; padding:2px 0; }
+  .day { min-height:44px; border:1px solid var(--line); border-radius:8px; background:transparent; color:var(--ink); font:500 16px 'Sarabun',sans-serif;
+         cursor:pointer; position:relative; padding:4px; }
+  .day:hover { border-color:var(--accent); }
+  .day.today { border:2px solid var(--accent); color:var(--accent); font-weight:600; }
+  .day.sel { background:var(--field); }
+  .day.has::after { content:""; position:absolute; bottom:5px; left:50%; width:7px; height:7px; margin-left:-3.5px; border-radius:50%; background:var(--warn); }
+  .day.blank { border:0; cursor:default; }
+  .annlist { margin-top:12px; display:grid; gap:8px; }
+  .ann { border-left:4px solid var(--warn); background:var(--field); border-radius:0 8px 8px 0; padding:6px 12px; }
+  .ann small { display:block; }
+  .vrow { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .vrow:last-child { border-bottom:0; }
+  .vrow span { color:var(--muted); }
+  .docb { display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+  .docb .btn { text-align:left; }
+
+  /* หน้างาน / ตรวจงาน */
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .bar h2, .pageh { margin:0; font-size:22px; }
+  .fg { display:grid; grid-template-columns:repeat(2,1fr); gap:0 14px; }
+  .item { display:grid; gap:8px; }
+  .lst { display:grid; gap:12px; }
+  .itop { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+  .itop b { font-size:18px; flex:1; min-width:160px; }
+  .cat { background:var(--field); border:1px solid var(--line); border-radius:6px; padding:0 10px; font-size:15px; color:var(--accent); }
+  .meta { color:var(--muted); font-size:16px; }
+  .lnk { color:var(--accent); font-weight:600; width:fit-content; }
+  .note { border-left:4px solid var(--warn); padding:4px 12px; background:var(--field); border-radius:0 8px 8px 0; }
+  .acts { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; align-items:center; }
+  .hint { color:var(--muted); font-size:15px; margin:-8px 0 12px; }
+
+  @media (max-width:1000px) { .hero, .g3 { grid-template-columns:1fr 1fr; } .heroL { grid-column:1/-1; } .g4 { grid-template-columns:1fr 1fr; } .hm { grid-template-columns:1fr; } }
+  @media (max-width:900px) {
+    .app, body.hr .app { grid-template-columns:1fr; grid-template-areas:"top" "main" "bottom"; }
+    body.hr .app { grid-template-areas:"top" "main" "right" "bottom"; }
+    .rightp { position:static; height:auto; border-left:0; border-top:1px solid var(--line); }
+    .side { position:fixed; left:0; top:0; height:100vh; z-index:20; width:min(300px,85vw); transform:translateX(-100%); transition:transform .2s; }
+    .side.open { transform:none; }
+    .burger { display:inline-block; }
+  }
+  @media (max-width:620px) { .hero, .g3, .g4, .g2 { grid-template-columns:1fr; } .span2, .wide { grid-column:auto; } .fg { grid-template-columns:1fr; } .me { text-align:left; } }
+  @media (prefers-reduced-motion:reduce) { .online i { animation:none; } .side { transition:none; } }
+</style>
+</head>
+<body>
+
+<!-- Login กลาง -->
+<div id="sLogin" class="center" hidden>
+  <div class="corner"><button class="btn ghost sm jsTheme" type="button"></button><button class="btn ghost sm jsLang" type="button"></button></div>
+  <form class="card login" id="fLogin" autocomplete="off">
+    <div class="logo">RAV</div>
+    <h1 data-i18n="app.title"></h1>
+    <p class="sub" data-i18n="lg.sub"></p>
+    <label class="field"><span data-i18n="lg.id"></span><input type="text" id="lgId" autocapitalize="none" spellcheck="false" required></label>
+    <label class="field"><span data-i18n="lg.pin"></span><input type="password" id="lgPin" required></label>
+    <label class="showpw"><input type="checkbox" id="lgShow"><span data-i18n="lg.show"></span></label>
+    <p class="msg" id="lgMsg" role="alert"></p>
+    <button class="btn main block" id="lgBtn" type="submit" data-i18n="lg.btn"></button>
+    <p class="help" data-i18n="lg.help"></p>
+  </form>
+</div>
+
+<!-- เปลี่ยนรหัส (บังคับตอนเข้าครั้งแรก) -->
+<div id="sChange" class="center" hidden>
+  <div class="corner"><button class="btn ghost sm jsTheme" type="button"></button><button class="btn ghost sm jsLang" type="button"></button></div>
+  <form class="card login" id="fChange" autocomplete="off">
+    <div class="logo">RAV</div>
+    <h1 id="chTitle"></h1>
+    <p class="sub" id="chSub"></p>
+    <label class="field"><span data-i18n="ch.old"></span><input type="password" id="chOld" required></label>
+    <label class="field"><span data-i18n="ch.new"></span><input type="password" id="chNew" required minlength="6"></label>
+    <label class="field"><span data-i18n="ch.new2"></span><input type="password" id="chNew2" required minlength="6"></label>
+    <p class="msg" id="chMsg" role="alert"></p>
+    <button class="btn main block" id="chBtn" type="submit" data-i18n="ch.save"></button>
+    <p class="help"><button class="btn ghost sm" type="button" id="chCancel" data-i18n="ch.cancel" hidden></button></p>
+  </form>
+</div>
+
+<!-- ระบบหลัก: เมนูซ้าย + แถบบน + เนื้อหา -->
+<div id="sApp" class="app" hidden>
+  <header class="top" id="top">
+    <button class="btn ghost sm burger" id="burger" type="button" aria-label="Menu">☰</button>
+    <div class="hrbrand"><span class="logo big">RAV</span><div><b data-i18n="app.title"></b><small data-i18n="hr.sub"></small></div></div>
+    <span class="pill good online"><i></i><span data-i18n="sh.online"></span></span>
+    <span class="clock"><span data-i18n="sh.session"></span> <b id="sess">00:00:00</b></span>
+    <span class="clock"><b id="clkDate"></b> <b id="clkTime"></b> GMT+7</span>
+    <span class="spacer"></span>
+    <div class="greet"><span class="gh" id="gHello"></span><span class="gn" id="gName"></span><small id="gSub"></small></div>
+    <button class="btn ghost sm jsTheme" type="button"></button>
+    <button class="btn ghost sm jsLang" type="button"></button>
+    <div class="me"><b id="meName"></b><small id="meSub"></small></div>
+  </header>
+  <aside id="side" class="side">
+    <div class="sbrand"><span class="logo">RAV</span><div><b data-i18n="app.title"></b><small>Foreign Department</small></div></div>
+    <nav id="nav" aria-label="Main menu"></nav>
+    <div id="miniCal" class="mini" hidden></div>
+    <div class="sfoot">
+      <button class="btn ghost sm" id="btnPw" type="button" data-i18n="sh.changePw"></button>
+      <button class="btn ghost sm" id="btnOut" type="button" data-i18n="sh.logout"></button>
+    </div>
+  </aside>
+  <div id="scrim" class="scrim" hidden></div>
+  <main id="content" class="content"></main>
+  <aside id="rightp" class="rightp" hidden><h2 data-i18n="al.title"></h2><div id="alerts" class="lst"></div></aside>
+  <footer id="foot" class="bottombar"></footer>
+</div>
+
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mdMsg" hidden>
+  <div class="card mbox"><p id="mdMsg"></p><button class="btn main" id="mdOk" type="button" data-i18n="md.ok"></button></div>
+</div>
+
+<script>
+  /* ================= ภาษา TH / EN ================= */
+  const T = {
+    th: {
+      'app.title':'ระบบแผนกภาษาต่างประเทศ',
+      'lg.sub':'เข้าสู่ระบบด้วย ID และ PIN ของคุณ', 'lg.id':'ID ผู้ใช้', 'lg.pin':'PIN / รหัสผ่าน', 'lg.show':'แสดงรหัส', 'lg.btn':'เข้าสู่ระบบ',
+      'lg.help':'ลืมรหัส หรือเข้าไม่ได้ ติดต่อหัวหน้าแผนก/ผู้ดูแลระบบเพื่อขอ PIN ใหม่',
+      'lg.expired':'หมดเวลาเข้าใช้งาน กรุณาเข้าสู่ระบบอีกครั้ง', 'lg.out':'ออกจากระบบแล้ว', 'lg.net':'เชื่อมต่อไม่ได้: ',
+      'err.BAD_LOGIN':'ID หรือ PIN ไม่ถูกต้อง', 'err.LOCKED':'ใส่รหัสผิดเกินกำหนด กรุณารอ 15 นาที หรือแจ้งผู้ดูแลเพื่อออก PIN ใหม่',
+      'err.OLD_WRONG':'รหัสเดิมไม่ถูกต้อง', 'err.NEW_SHORT':'รหัสใหม่ต้องยาวอย่างน้อย {0} ตัวอักษร', 'err.NEW_SAME':'รหัสใหม่ต้องไม่ซ้ำรหัสเดิม',
+      'err.TITLE_REQ':'กรุณากรอกชื่อรายการ', 'err.TERM_REQ':'กรุณากรอกภาคเรียน/ปีการศึกษา', 'err.KIND_REQ':'กรุณาเลือกประเภท',
+      'err.URL_HTTPS':'ลิงก์ไฟล์ต้องขึ้นต้นด้วย https://', 'err.NOT_FOUND':'ไม่พบรายการนี้', 'err.CANT_EDIT':'แก้ไขไม่ได้ในสถานะนี้',
+      'err.CANT_SUBMIT':'ส่งตรวจไม่ได้ในสถานะนี้', 'err.LINK_REQ':'กรุณาแนบลิงก์ไฟล์ก่อนส่งตรวจ', 'err.CANT_DELETE':'ลบได้เฉพาะงานที่ยังเป็นร่าง',
+      'err.REASON_REQ':'กรุณาเขียนเหตุผลที่ตีกลับ', 'err.NOT_PENDING':'รายการนี้ไม่ได้อยู่ในสถานะรอตรวจแล้ว',
+      'ch.title':'ตั้งรหัสใหม่', 'ch.titleOpt':'เปลี่ยนรหัส', 'ch.subForced':'กรุณาตั้งรหัสส่วนตัวก่อนเข้าใช้งาน (อย่างน้อย 6 ตัวอักษร)',
+      'ch.subOpt':'รหัสใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร', 'ch.old':'รหัสเดิม (PIN ที่ได้รับ)', 'ch.new':'รหัสใหม่', 'ch.new2':'ยืนยันรหัสใหม่',
+      'ch.mismatch':'รหัสใหม่ทั้งสองช่องไม่ตรงกัน', 'ch.save':'บันทึกรหัสใหม่', 'ch.cancel':'ยกเลิก',
+      'sh.online':'ออนไลน์', 'sh.session':'อยู่ในระบบ', 'sh.toBright':'โหมดสว่าง', 'sh.toDark':'โหมดมืด', 'sh.changePw':'เปลี่ยนรหัส', 'sh.logout':'ออกจากระบบ',
+      'sh.level':'ระดับ {0}',
+      'role.HEAD':'หัวหน้าแผนก', 'role.LIAISON':'ผู้ประสานงานแผนก', 'role.TEACHER':'ครูผู้สอน', 'role.HR':'เจ้าหน้าที่ธุรการ', 'role.TIER_B':'ผู้บริหาร',
+      'nav.home':'หน้าหลัก', 'nav.overview':'ภาพรวม', 'nav.review':'ตรวจงาน', 'nav.curriculum':'หลักสูตร', 'nav.docreq':'ขอเอกสาร',
+      'cur.c1':'ชื่อวิชาและระดับชั้น', 'cur.c2':'คำอธิบายรายวิชา', 'cur.c3':'ผลการเรียนรู้ (L.O.)', 'cur.c4':'โครงสร้างรายวิชา', 'cur.c5':'หน่วยการเรียนรู้',
+      'cat.MasterPlans':'แผนการจัดการเรียนรู้', 'cat.Scores':'คะแนนเก็บ', 'cat.Activities':'ใบความรู้ ใบงาน แบบทดสอบ', 'cat.Exams':'ข้อสอบ',
+      'ph.soon':'กำลังพัฒนา', 'ph.c1':'แสดงชื่อวิชาที่รับผิดชอบและระดับชั้น', 'ph.pdf':'ครูเปิดไฟล์ PDF เพื่ออ้างอิง และขอดูรายละเอียดหลักสูตรได้ที่นี่',
+      'ph.docreq':'ฟอร์มขอเอกสาร: เอกสารรับรองเงินเดือน, ขอ OEC, พิมพ์บันทึกข้อความ', 'ph.tt':'ตารางสอนรายบุคคล',
+      'hm.cal':'ปฏิทินแจ้งการปฏิบัติงาน', 'hm.noann':'ไม่มีประกาศในเดือนนี้', 'hm.prog':'ความคืบหน้าการส่งงาน', 'hm.progSub':'ส่งแล้ว {0} จาก {1} รายการ',
+      'hm.progNone':'ยังไม่มีงานในระบบ', 'hm.progRet':'ตีกลับ {0} รายการ ต้องแก้ไข', 'hm.tt':'ตารางสอนของฉัน', 'hm.vis':'วีซ่า / Work Permit / สัญญาจ้าง',
+      'hm.visNone':'ยังไม่มีข้อมูล ฝ่ายธุรการจะเป็นผู้บันทึก', 'hm.expired':'หมดอายุแล้ว', 'hm.days':'อีก {0} วัน', 'hm.docs':'ขอเอกสาร',
+      'hm.d1':'เอกสารรับรองเงินเดือน', 'hm.d2':'ขอ OEC', 'hm.d3':'พิมพ์บันทึกข้อความ', 'hm.prev':'เดือนก่อน', 'hm.next':'เดือนถัดไป',
+      'ty.contractEnd':'สัญญาจ้าง', 'ty.workPermitExpiry':'Work Permit', 'ty.visaExpiry':'วีซ่า',
+      'wk.add':'+ เพิ่มงานใหม่', 'wk.addTitle':'เพิ่มงานใหม่', 'wk.editTitle':'แก้ไขงาน', 'wk.empty':'ยังไม่มีงานในหมวดนี้ กด "+ เพิ่มงานใหม่" เพื่อเริ่ม',
+      'wk.subject':'รายวิชา', 'wk.class':'ระดับชั้น / ห้อง', 'wk.term':'ภาคเรียน/ปีการศึกษา (เช่น 1/2569)', 'wk.title':'ชื่อรายการ',
+      'wk.url':'ลิงก์ไฟล์ใน Drive (ตั้งสิทธิ์ให้ผู้ตรวจเปิดได้ ขึ้นต้นด้วย https://)', 'wk.saveDraft':'บันทึกร่าง', 'wk.saveSend':'บันทึกและส่งตรวจ',
+      'wk.cancel':'ยกเลิก', 'wk.edit':'แก้ไข', 'wk.submit':'ส่งตรวจ', 'wk.del':'ลบ', 'wk.delSure':'ยืนยันลบ', 'wk.openFile':'เปิดไฟล์',
+      'wk.noLink':'ยังไม่ได้แนบลิงก์ไฟล์', 'wk.note':'ความเห็นผู้ตรวจ', 'wk.sentAt':'ส่งเมื่อ {0} · รอผู้ตรวจ', 'wk.reviewedAt':'ตรวจเมื่อ {0}',
+      'wk.savedNoSend':'บันทึกร่างแล้ว แต่ยังส่งตรวจไม่ได้: ', 'wk.loading':'กำลังโหลด…', 'wk.kindScore':'ประเภทคะแนน', 'wk.kindExam':'ประเภทข้อสอบ',
+      'wk.scoreHint':'Grade 1–6 (Score_A) ส่งครบ 8 ช่วง PAA–FS2 · Grade 7–9 (Score_B) ส่งเฉพาะ 4 ช่วงของภาคที่สอน',
+      'k.PAA':'PAA · คะแนนก่อนสอบกลางภาค ภาค 1', 'k.MS1':'MS1 · คะแนนสอบกลางภาค ภาค 1', 'k.PAB':'PAB · คะแนนก่อนสอบปลายภาค ภาค 1', 'k.FS1':'FS1 · คะแนนสอบปลายภาค ภาค 1',
+      'k.PAC':'PAC · คะแนนก่อนสอบกลางภาค ภาค 2', 'k.MS2':'MS2 · คะแนนสอบกลางภาค ภาค 2', 'k.PAD':'PAD · คะแนนก่อนสอบปลายภาค ภาค 2', 'k.FS2':'FS2 · คะแนนสอบปลายภาค ภาค 2',
+      'k.Midterm':'ข้อสอบกลางภาค', 'k.Final':'ข้อสอบปลายภาค',
+      'rv.title':'งานรอตรวจ ({0})', 'rv.empty':'ไม่มีงานรอตรวจ', 'rv.ph':'ความเห็น (จำเป็นเมื่อตีกลับ)', 'rv.return':'ตีกลับ', 'rv.approve':'อนุมัติ',
+      'st.DRAFT':'ร่าง', 'st.SUBMITTED':'รอตรวจ', 'st.APPROVED':'อนุมัติแล้ว', 'st.RETURNED':'ตีกลับ',
+      'ts.RETURNED':'ตีกลับ', 'ts.PENDING':'รอตรวจ', 'ts.COMPLETE':'ครบแล้ว', 'ts.IN_PROGRESS':'กำลังทำ', 'ts.NO_WORK':'ยังไม่มีงาน',
+      'ts.EXPIRED':'หมดอายุ', 'ts.SOON':'ใกล้หมด', 'ts.OK':'ปกติ', 'ts.NO_DATA':'ยังไม่กรอก',
+      'ov.dept':'ภาพรวมงานแผนกภาษาต่างประเทศ', 'ov.hr':'ภาพรวมข้อมูลบุคลากรต่างชาติ', 'ov.academic':'ภาพรวมงานวิชาการ', 'ov.hr2':'ภาพรวมข้อมูล HR',
+      'ov.chipT':'ครู {0} คน', 'ov.chipI':'งาน {0} รายการ', 'ov.chipW':'เตือนล่วงหน้า {0} วัน', 'ov.apr':'อัตราอนุมัติ', 'ov.aprSub':'{0} จาก {1} รายการ',
+      'ov.pend':'ส่งแล้ว รอตรวจ', 'ov.pendSub':'รอหัวหน้าแผนกตรวจ', 'ov.ret':'ตีกลับให้แก้', 'ov.retYes':'ต้องติดตาม', 'ov.retNo':'ไม่มีงานค้างแก้',
+      'ov.teachers':'ครูผู้สอน', 'ov.people':'คน', 'ov.total':'งานทั้งหมด', 'ov.items':'รายการ', 'ov.approved':'อนุมัติแล้ว', 'ov.draft':'ร่าง',
+      'ov.byCat':'สถานะงานแยกตามหมวด', 'ov.noItems':'ยังไม่มีงานในระบบ', 'ov.aprCat':'อัตราอนุมัติแยกหมวด', 'ov.sentCat':'ส่งงานแล้ว (ส่ง + อนุมัติ)',
+      'ov.centerApr':'อนุมัติแล้ว', 'ov.centerSent':'ส่งแล้ว', 'ov.tblAll':'ความคืบหน้ารายครู (อนุมัติ/ทั้งหมด)',
+      'col.teacher':'ครูผู้สอน', 'col.status':'สถานะ',
+      'hr.soon':'{0}ใกล้หมด', 'hr.expN':'หมดอายุแล้ว {0}', 'hr.expNone':'ยังไม่มีหมดอายุ', 'hr.staff':'ครูในระบบ HR', 'hr.soonAll':'ใกล้หมดอายุรวม',
+      'hr.expAll':'หมดอายุแล้ว', 'hr.okPct':'เอกสารปกติ', 'hr.donut':'เอกสารที่ยังไม่หมดอายุ', 'hr.center':'ปกติ', 'hr.table':'สถานะเอกสารรายครู',
+      'c.nodata':'ยังไม่มีข้อมูล', 'c.err':'เปิดข้อมูลไม่ได้: ', 'c.foot':'ที่มา: ฐานข้อมูลแผนกภาษาต่างประเทศ (Google Sheets) · สร้างเมื่อ {0}'
+    },
+    en: {
+      'app.title':'Foreign Department System',
+      'lg.sub':'Log in with your ID and PIN', 'lg.id':'User ID', 'lg.pin':'PIN / Password', 'lg.show':'Show password', 'lg.btn':'Log in',
+      'lg.help':'Forgot your PIN or cannot log in? Contact the Head of Department or the system administrator.',
+      'lg.expired':'Your session has expired. Please log in again.', 'lg.out':'You have been logged out.', 'lg.net':'Connection failed: ',
+      'err.BAD_LOGIN':'Incorrect ID or PIN.', 'err.LOCKED':'Too many failed attempts. Please wait 15 minutes or ask the administrator for a new PIN.',
+      'err.OLD_WRONG':'The current PIN is incorrect.', 'err.NEW_SHORT':'The new password must be at least {0} characters.', 'err.NEW_SAME':'The new password must differ from the current one.',
+      'err.TITLE_REQ':'Please enter a title.', 'err.TERM_REQ':'Please enter the term / academic year.', 'err.KIND_REQ':'Please choose a type.',
+      'err.URL_HTTPS':'The file link must start with https://', 'err.NOT_FOUND':'Item not found.', 'err.CANT_EDIT':'This item cannot be edited in its current status.',
+      'err.CANT_SUBMIT':'This item cannot be submitted in its current status.', 'err.LINK_REQ':'Please attach a file link before submitting.', 'err.CANT_DELETE':'Only drafts can be deleted.',
+      'err.REASON_REQ':'Please write the reason for returning.', 'err.NOT_PENDING':'This item is no longer awaiting review.',
+      'ch.title':'Set a new password', 'ch.titleOpt':'Change password', 'ch.subForced':'Please set your own password before you continue (at least 6 characters).',
+      'ch.subOpt':'The new password must be at least 6 characters.', 'ch.old':'Current PIN / password', 'ch.new':'New password', 'ch.new2':'Confirm new password',
+      'ch.mismatch':'The two new passwords do not match.', 'ch.save':'Save new password', 'ch.cancel':'Cancel',
+      'sh.online':'Online', 'sh.session':'Session', 'sh.toBright':'Bright mode', 'sh.toDark':'Dark mode', 'sh.changePw':'Change password', 'sh.logout':'Log out',
+      'sh.level':'Level {0}',
+      'role.HEAD':'Head of Department', 'role.LIAISON':'Department Liaison', 'role.TEACHER':'Teacher', 'role.HR':'Administration Officer', 'role.TIER_B':'Executive',
+      'nav.home':'Home', 'nav.overview':'Overview', 'nav.review':'Review work', 'nav.curriculum':'Curriculum', 'nav.docreq':'Document Requests',
+      'cur.c1':'Course Name and Grade', 'cur.c2':'Course Description', 'cur.c3':'Learning Outcomes (L.O.)', 'cur.c4':'Course Structure', 'cur.c5':'Unit of Instruction',
+      'cat.MasterPlans':'Lesson Plan', 'cat.Scores':'Score', 'cat.Activities':'Activity Sheets and Tests', 'cat.Exams':'Exams',
+      'ph.soon':'Coming soon', 'ph.c1':'Shows the courses you teach and their grade levels.', 'ph.pdf':'Open the PDF for reference and request curriculum details here.',
+      'ph.docreq':'Request forms: salary certificate, OEC request, memo writing.', 'ph.tt':'Your personal timetable.',
+      'hm.cal':'Work Calendar', 'hm.noann':'No announcements this month', 'hm.prog':'Submission Progress', 'hm.progSub':'{0} of {1} items submitted',
+      'hm.progNone':'No work in the system yet', 'hm.progRet':'{0} item(s) returned — please revise', 'hm.tt':'My Timetable', 'hm.vis':'Visa / Work Permit / Contract',
+      'hm.visNone':'No record yet. The administration office will add it.', 'hm.expired':'Expired', 'hm.days':'{0} days left', 'hm.docs':'Document Requests',
+      'hm.d1':'Salary certificate', 'hm.d2':'OEC request', 'hm.d3':'Memo writing', 'hm.prev':'Previous month', 'hm.next':'Next month',
+      'ty.contractEnd':'Contract', 'ty.workPermitExpiry':'Work Permit', 'ty.visaExpiry':'Visa',
+      'wk.add':'+ Add new', 'wk.addTitle':'Add new', 'wk.editTitle':'Edit', 'wk.empty':'Nothing here yet. Press "+ Add new" to start.',
+      'wk.subject':'Subject', 'wk.class':'Grade / Class', 'wk.term':'Term / Academic year (e.g. 1/2026)', 'wk.title':'Title',
+      'wk.url':'File link on Drive (share it so reviewers can open it; must start with https://)', 'wk.saveDraft':'Save draft', 'wk.saveSend':'Save and submit',
+      'wk.cancel':'Cancel', 'wk.edit':'Edit', 'wk.submit':'Submit', 'wk.del':'Delete', 'wk.delSure':'Confirm delete', 'wk.openFile':'Open file',
+      'wk.noLink':'No file link attached', 'wk.note':'Reviewer comment', 'wk.sentAt':'Submitted {0} · awaiting review', 'wk.reviewedAt':'Reviewed {0}',
+      'wk.savedNoSend':'Saved as a draft, but it could not be submitted: ', 'wk.loading':'Loading…', 'wk.kindScore':'Score type', 'wk.kindExam':'Exam type',
+      'wk.scoreHint':'Grade 1–6 (Score_A): submit all 8 (PAA–FS2) · Grade 7–9 (Score_B): only the 4 of the term you teach',
+      'k.PAA':'PAA · Before midterm, Term 1', 'k.MS1':'MS1 · Midterm score, Term 1', 'k.PAB':'PAB · Before final, Term 1', 'k.FS1':'FS1 · Final score, Term 1',
+      'k.PAC':'PAC · Before midterm, Term 2', 'k.MS2':'MS2 · Midterm score, Term 2', 'k.PAD':'PAD · Before final, Term 2', 'k.FS2':'FS2 · Final score, Term 2',
+      'k.Midterm':'Midterm exam', 'k.Final':'Final exam',
+      'rv.title':'Awaiting review ({0})', 'rv.empty':'Nothing is awaiting review', 'rv.ph':'Comment (required when returning)', 'rv.return':'Return', 'rv.approve':'Approve',
+      'st.DRAFT':'Draft', 'st.SUBMITTED':'Pending review', 'st.APPROVED':'Approved', 'st.RETURNED':'Returned',
+      'ts.RETURNED':'Returned', 'ts.PENDING':'Pending review', 'ts.COMPLETE':'Complete', 'ts.IN_PROGRESS':'In progress', 'ts.NO_WORK':'No work yet',
+      'ts.EXPIRED':'Expired', 'ts.SOON':'Expiring soon', 'ts.OK':'OK', 'ts.NO_DATA':'No data',
+      'ov.dept':'Foreign Department Overview', 'ov.hr':'Foreign Staff Records Overview', 'ov.academic':'Academic Work Overview', 'ov.hr2':'HR Overview',
+      'ov.chipT':'{0} teachers', 'ov.chipI':'{0} items', 'ov.chipW':'Alert {0} days ahead', 'ov.apr':'Approval rate', 'ov.aprSub':'{0} of {1} items',
+      'ov.pend':'Submitted, awaiting review', 'ov.pendSub':'Awaiting the Head or Liaison', 'ov.ret':'Returned for revision', 'ov.retYes':'Needs follow-up', 'ov.retNo':'Nothing outstanding',
+      'ov.teachers':'Teachers', 'ov.people':'people', 'ov.total':'Total items', 'ov.items':'items', 'ov.approved':'Approved', 'ov.draft':'Draft',
+      'ov.byCat':'Work status by category', 'ov.noItems':'No work in the system yet', 'ov.aprCat':'Approval rate by category', 'ov.sentCat':'Submitted (submitted + approved)',
+      'ov.centerApr':'Approved', 'ov.centerSent':'Submitted', 'ov.tblAll':'Progress by teacher (approved / total)',
+      'col.teacher':'Teacher', 'col.status':'Status',
+      'hr.soon':'{0} expiring', 'hr.expN':'{0} expired', 'hr.expNone':'None expired', 'hr.staff':'Teachers in HR records', 'hr.soonAll':'Expiring in total',
+      'hr.expAll':'Expired', 'hr.okPct':'Valid documents', 'hr.donut':'Documents not yet expired', 'hr.center':'OK', 'hr.table':'Document status by teacher',
+      'c.nodata':'No data yet', 'c.err':'Could not load data: ', 'c.foot':'Source: Foreign Department database (Google Sheets) · generated {0}'
+    }
+  };
+  Object.assign(T.th, {
+    'hr.sub':'งานครูต่างชาติ', 'md.late':'เลยเวลาทำงานแล้วครับ ควรพักผ่อนนะ', 'md.ok':'รับทราบ', 'c.ver':'เวอร์ชัน {0}',
+    'nav.staff':'ตารางรายชื่อครูต่างชาติ', 'nav.profiles':'โปรไฟล์ครู', 'nav.later':'เมนูที่กำลังพัฒนา',
+    'nav.addr':'ที่อยู่อาศัย', 'nav.passport':'พาสปอร์ต', 'nav.wp':'ใบอนุญาตทำงาน', 'nav.visa':'วีซ่า', 'nav.contract':'ต่อสัญญา',
+    'nav.docs':'ออกเอกสาร', 'nav.attend':'สถิติวันทำงาน', 'nav.check':'เช็คลิสต์ส่วนตัว', 'nav.notes':'สมุดบันทึก',
+    'ph.hr.addr':'เลือกพักในโรงเรียนหรือนอกโรงเรียน และแนบเอกสารจากเจ้าของบ้านเป็นไฟล์ PDF',
+    'ph.hr.passport':'รายละเอียดพาสปอร์ต สแกน PDF ทุกหน้าที่อัปเดต และฟอร์มบันทึกการออก-เข้าประเทศ',
+    'ph.hr.wp':'รายละเอียดใบอนุญาตทำงาน และไฟล์ PDF ฉบับล่าสุด',
+    'ph.hr.visa':'รายการวีซ่าที่ถืออยู่ เก็บประวัติเดิมไว้ และตั้งฉบับใหม่เป็นฉบับปัจจุบัน',
+    'ph.hr.contract':'ต่อสัญญา ระบบใส่ข้อมูลครูให้ แล้วพิมพ์เป็น PDF',
+    'ph.hr.docs':'ออกหนังสือรับรองเงินเดือน หนังสือรับรองการทำงาน หนังสือขอ OEC ใบเตือน และหนังสือถึงหน่วยงานต่าง ๆ',
+    'ph.hr.attend':'สถิติวันขาด ลากิจ ลาป่วย และมาสาย',
+    'ph.hr.check':'เช็คลิสต์ส่วนตัว ติ๊กเมื่อทำแล้ว เพิ่ม แก้ไข และลบได้',
+    'ph.hr.notes':'สมุดบันทึกงาน พร้อมพิมพ์ด้วยเสียง',
+    'sf.table':'ตารางรายชื่อครูต่างชาติ', 'sf.empty':'ยังไม่มีครูในระบบ',
+    'col.nat':'สัญชาติ', 'col.age':'อายุ', 'col.passport':'เลขพาสปอร์ต', 'col.wpno':'เลขใบอนุญาตทำงาน', 'col.wpexp':'ใบอนุญาตหมดอายุ', 'col.notes':'หมายเหตุ',
+    'pf.back':'← กลับ', 'pf.nationality':'สัญชาติ', 'pf.dob':'วันเกิด', 'pf.passportNo':'เลขพาสปอร์ต', 'pf.passportExpiry':'พาสปอร์ตหมดอายุ',
+    'pf.visaType':'ประเภทวีซ่า', 'pf.visaNo':'เลขวีซ่า', 'pf.visaExpiry':'วีซ่าหมดอายุ', 'pf.wpNo':'เลขใบอนุญาตทำงาน',
+    'pf.workPermitExpiry':'ใบอนุญาตทำงานหมดอายุ', 'pf.contractStart':'สัญญาเริ่ม', 'pf.contractEnd':'สัญญาสิ้นสุด', 'pf.position':'ตำแหน่ง',
+    'pf.duties':'หน้าที่รับผิดชอบ', 'pf.salary':'เงินเดือน (บาท)', 'pf.notes':'หมายเหตุ', 'pf.save':'บันทึกโปรไฟล์', 'pf.saved':'บันทึกแล้ว',
+    'pf.sens':'ข้อมูลอ่อนไหว: ทุกการเปิดดูและการแก้ไขถูกบันทึกใน Log', 'pf.age':'อายุ {0} ปี',
+    'al.title':'การแจ้งเตือน', 'al.none':'ไม่มีการแจ้งเตือน', 'ty.passportExpiry':'พาสปอร์ต', 'ev.exp':'{0} หมดอายุ · {1}',
+    'cal.title':'รายการวันที่ {0}', 'cal.none':'ไม่มีรายการในวันนี้',
+    'err.DATE_BAD':'รูปแบบวันที่ไม่ถูกต้อง', 'err.SALARY_BAD':'เงินเดือนต้องเป็นตัวเลข'
+  });
+  Object.assign(T.en, {
+    'hr.sub':'Foreign Teachers Administration', 'md.late':'It is past working hours. Please get some rest.', 'md.ok':'Understood', 'c.ver':'Version {0}',
+    'nav.staff':'Foreign Teachers Table', 'nav.profiles':'Teacher Profiles', 'nav.later':'Coming soon',
+    'nav.addr':'Address', 'nav.passport':'Passport', 'nav.wp':'Work Permit', 'nav.visa':'Visa', 'nav.contract':'Contract Renewal',
+    'nav.docs':'Official Documents', 'nav.attend':'Attendance', 'nav.check':'My Checklist', 'nav.notes':'Notebook',
+    'ph.hr.addr':'Choose on-campus or off-campus housing and attach the landlord\'s documents as PDF.',
+    'ph.hr.passport':'Passport details, PDF scans of every updated page, and the exit / re-entry form.',
+    'ph.hr.wp':'Work permit details and the latest PDF.',
+    'ph.hr.visa':'Visas held. History is kept and the newest one is marked as current.',
+    'ph.hr.contract':'Renew a contract: the teacher\'s details are filled in and printed as PDF.',
+    'ph.hr.docs':'Issue salary and employment certificates, the OEC request, warning letters and letters to agencies.',
+    'ph.hr.attend':'Statistics on absences, personal leave, sick leave and lateness.',
+    'ph.hr.check':'Personal checklist: tick when done; add, edit and delete items.',
+    'ph.hr.notes':'Work notebook with voice typing.',
+    'sf.table':'Foreign Teachers Table', 'sf.empty':'No teachers in the system yet',
+    'col.nat':'Nationality', 'col.age':'Age', 'col.passport':'Passport No.', 'col.wpno':'Work Permit No.', 'col.wpexp':'Work Permit Expiry', 'col.notes':'Remarks',
+    'pf.back':'← Back', 'pf.nationality':'Nationality', 'pf.dob':'Date of birth', 'pf.passportNo':'Passport number', 'pf.passportExpiry':'Passport expiry',
+    'pf.visaType':'Visa type', 'pf.visaNo':'Visa number', 'pf.visaExpiry':'Visa expiry', 'pf.wpNo':'Work permit number',
+    'pf.workPermitExpiry':'Work permit expiry', 'pf.contractStart':'Contract start', 'pf.contractEnd':'Contract end', 'pf.position':'Position',
+    'pf.duties':'Duties', 'pf.salary':'Salary (THB)', 'pf.notes':'Remarks', 'pf.save':'Save profile', 'pf.saved':'Saved',
+    'pf.sens':'Sensitive data: every view and edit is recorded in the log.', 'pf.age':'Age {0}',
+    'al.title':'Notifications', 'al.none':'No notifications', 'ty.passportExpiry':'Passport', 'ev.exp':'{0} expires · {1}',
+    'cal.title':'Items on {0}', 'cal.none':'Nothing on this day',
+    'err.DATE_BAD':'Invalid date.', 'err.SALARY_BAD':'Salary must be a number.'
+  });
+  Object.assign(T.th, {
+    'dc.title':'เอกสารและไฟล์สแกน', 'dc.PASSPORT':'พาสปอร์ต', 'dc.VISA':'วีซ่า', 'dc.WP':'ใบอนุญาตทำงาน', 'dc.none':'ยังไม่มีไฟล์',
+    'dc.download':'ดาวน์โหลด', 'dc.archive':'เก็บเข้าที่เก็บ', 'dc.archiveSure':'ยืนยันเก็บเข้าที่เก็บ', 'dc.current':'ฉบับปัจจุบัน',
+    'dc.verified':'ตรวจตราประทับแล้ว', 'dc.upload':'อัปโหลดไฟล์', 'dc.pickPdf':'เลือกไฟล์ PDF (ไม่เกิน 8 MB)', 'dc.number':'เลขที่',
+    'dc.expiry':'วันหมดอายุ', 'dc.visaType':'ประเภทวีซ่า', 'dc.verifiedLbl':'ตรวจสอบตราประทับในพาสปอร์ตแล้ว',
+    'dc.replaceNote':'ไฟล์เดิมจะถูกย้ายเข้าที่เก็บโดยอัตโนมัติและบันทึกใน Log', 'dc.keepNote':'เก็บวีซ่าเดิมไว้ทั้งหมด ฉบับที่อัปโหลดใหม่เป็นฉบับปัจจุบัน',
+    'dc.archived':'ที่เก็บ (ไฟล์เดิม)', 'dc.by':'โดย {0} · {1}', 'dc.size':'{0} KB', 'dc.uploading':'กำลังอัปโหลด…', 'dc.photo':'เปลี่ยนรูปถ่าย (JPG/PNG)',
+    'dc.dlFail':'ดาวน์โหลดไม่สำเร็จ: ',
+    'err.FILE_TYPE':'ไฟล์ต้องเป็น PDF', 'err.IMG_TYPE':'ต้องเป็นรูป JPG หรือ PNG', 'err.FILE_BIG':'ไฟล์ใหญ่เกินไป (PDF ไม่เกิน 8 MB)',
+    'err.FILE_NONE':'กรุณาเลือกไฟล์', 'err.READ_FAIL':'อ่านไฟล์ไม่ได้'
+  });
+  Object.assign(T.en, {
+    'dc.title':'Documents and scans', 'dc.PASSPORT':'Passport', 'dc.VISA':'Visa', 'dc.WP':'Work permit', 'dc.none':'No file yet',
+    'dc.download':'Download', 'dc.archive':'Archive', 'dc.archiveSure':'Confirm archive', 'dc.current':'Current',
+    'dc.verified':'Stamp verified', 'dc.upload':'Upload', 'dc.pickPdf':'Choose a PDF file (max 8 MB)', 'dc.number':'Number',
+    'dc.expiry':'Expiry date', 'dc.visaType':'Visa type', 'dc.verifiedLbl':'The stamp in the passport has been checked',
+    'dc.replaceNote':'The previous file is archived automatically and logged.', 'dc.keepNote':'Older visas are kept; the newly uploaded one becomes current.',
+    'dc.archived':'Archived files', 'dc.by':'by {0} · {1}', 'dc.size':'{0} KB', 'dc.uploading':'Uploading…', 'dc.photo':'Change photo (JPG/PNG)',
+    'dc.dlFail':'Download failed: ',
+    'err.FILE_TYPE':'The file must be a PDF.', 'err.IMG_TYPE':'Must be a JPG or PNG image.', 'err.FILE_BIG':'The file is too large (PDF up to 8 MB).',
+    'err.FILE_NONE':'Please choose a file.', 'err.READ_FAIL':'Could not read the file.'
+  });
+  Object.assign(T.th, {
+    'nav.addStaff':'เพิ่มครูใหม่', 'nav.former':'ครูที่ลาออก', 'pf.add':'+ เพิ่มครูใหม่',
+    'as.title':'เพิ่มครูต่างชาติใหม่', 'as.id':'ID สำหรับเข้าระบบ (ตัวอักษรอังกฤษ/ตัวเลข เช่น t13)', 'as.name':'ชื่อ-นามสกุล', 'as.email':'อีเมล (ถ้ามี)',
+    'as.pw':'รหัสผ่านเริ่มต้น (เว้นว่าง = ให้ระบบสุ่มให้)', 'as.create':'สร้างบัญชีครู', 'as.done':'สร้างบัญชีแล้ว', 'as.pwShown':'รหัสผ่านเริ่มต้น (แสดงครั้งเดียว)',
+    'as.pwNote':'แจ้งครูแบบส่วนตัว ครูต้องตั้งรหัสใหม่เองตอนเข้าครั้งแรก', 'as.next':'ไปที่โปรไฟล์ครู', 'as.copy':'คัดลอก', 'as.copied':'คัดลอกแล้ว',
+    'as.hint':'หลังสร้างบัญชี ไปกรอกโปรไฟล์ ใส่รูปถ่าย และแนบพาสปอร์ต วีซ่า ใบอนุญาตทำงานต่อได้',
+    'ac.title':'บัญชีและสถานะ', 'ac.reset':'รีเซ็ตรหัสผ่าน', 'ac.resetNote':'ตั้งรหัสใหม่ให้ครู (เว้นว่าง = ให้ระบบสุ่ม) ครูต้องเปลี่ยนรหัสตอนเข้าครั้งแรก',
+    'ac.resetDone':'รีเซ็ตรหัสผ่านแล้ว', 'ac.resign':'บันทึกการลาออก', 'ac.resignDate':'วันที่ลาออก', 'ac.reason':'เหตุผล / หมายเหตุ', 'ac.confirm':'ยืนยันการลาออก',
+    'ac.resignNote':'บัญชีจะเข้าระบบไม่ได้ทันที ส่วนข้อมูลและไฟล์ทั้งหมดยังเก็บไว้และดูย้อนหลังได้ กดยืนยันอีกครั้งเพื่อดำเนินการ',
+    'ac.pending':'ครูคนนี้มีงานรอตรวจ {0} รายการ ซึ่งจะไม่แสดงในคิวตรวจหลังลาออก กดยืนยันอีกครั้งเพื่อดำเนินการต่อ', 'ac.resigned':'ลาออกเมื่อ {0}',
+    'fm.title':'ครูที่ลาออก', 'fm.empty':'ยังไม่มีครูที่ลาออก', 'fm.open':'ดูโปรไฟล์', 'fm.reinstate':'รับกลับเข้าทำงาน', 'fm.reinSure':'ยืนยันรับกลับ',
+    'fm.reinNote':'รหัสผ่านใหม่ (เว้นว่าง = สุ่ม)', 'fm.reinDone':'รับกลับเข้าทำงานแล้ว', 'fm.by':'บันทึกโดย {0}', 'fm.noDate':'ไม่ได้ระบุวันที่',
+    'err.ID_BAD':'ID ต้องยาว 3–30 ตัว ใช้ตัวอักษรอังกฤษ ตัวเลข . _ - เท่านั้น', 'err.ID_TAKEN':'ID นี้ถูกใช้แล้ว', 'err.NAME_REQ':'กรุณากรอกชื่อ',
+    'err.PW_SHORT':'รหัสผ่านสั้นเกินไป (อย่างน้อย {0} ตัวอักษร)', 'err.PW_SAME_ID':'รหัสผ่านต้องไม่เหมือน ID', 'err.DATE_REQ':'กรุณาระบุวันที่ลาออก',
+    'err.PENDING_WORK':'ครูมีงานรอตรวจอยู่'
+  });
+  Object.assign(T.en, {
+    'nav.addStaff':'Add New Teacher', 'nav.former':'Former Teachers', 'pf.add':'+ Add new teacher',
+    'as.title':'Add a new foreign teacher', 'as.id':'Login ID (letters / numbers, e.g. t13)', 'as.name':'Full name', 'as.email':'Email (optional)',
+    'as.pw':'Initial password (leave empty to generate one)', 'as.create':'Create teacher account', 'as.done':'Account created', 'as.pwShown':'Initial password (shown once)',
+    'as.pwNote':'Give it to the teacher privately. They must set their own password at first login.', 'as.next':'Open the profile', 'as.copy':'Copy', 'as.copied':'Copied',
+    'as.hint':'After creating the account, fill in the profile, add a photo, and attach the passport, visa and work permit.',
+    'ac.title':'Account and status', 'ac.reset':'Reset password', 'ac.resetNote':'Set a new password for the teacher (empty = generate one). They must change it at next login.',
+    'ac.resetDone':'Password reset', 'ac.resign':'Record resignation', 'ac.resignDate':'Resignation date', 'ac.reason':'Reason / remarks', 'ac.confirm':'Confirm resignation',
+    'ac.resignNote':'The account is blocked immediately. All data and files are kept and remain viewable. Press confirm again to proceed.',
+    'ac.pending':'This teacher has {0} item(s) awaiting review; they will no longer appear in the review queue. Press confirm again to continue.', 'ac.resigned':'Resigned {0}',
+    'fm.title':'Former teachers', 'fm.empty':'No former teachers', 'fm.open':'View profile', 'fm.reinstate':'Reinstate', 'fm.reinSure':'Confirm reinstate',
+    'fm.reinNote':'New password (empty = generate)', 'fm.reinDone':'Teacher reinstated', 'fm.by':'recorded by {0}', 'fm.noDate':'Date not recorded',
+    'err.ID_BAD':'The ID must be 3–30 characters: letters, numbers, . _ -', 'err.ID_TAKEN':'This ID is already taken.', 'err.NAME_REQ':'Please enter the name.',
+    'err.PW_SHORT':'The password is too short (at least {0} characters).', 'err.PW_SAME_ID':'The password must not be the same as the ID.', 'err.DATE_REQ':'Please enter the resignation date.',
+    'err.PENDING_WORK':'This teacher has work awaiting review.'
+  });
+  Object.assign(T.th, {
+    'at.type.ABSENT':'ขาดงาน', 'at.type.PERSONAL_LEAVE':'ลากิจ', 'at.type.SICK_LEAVE':'ลาป่วย', 'at.type.LATE':'มาสาย',
+    'at.from':'ตั้งแต่วันที่', 'at.to':'ถึงวันที่', 'at.apply':'ดูสถิติ', 'at.month':'เดือนนี้', 'at.all':'ทั้งหมด', 'at.add':'บันทึกรายการใหม่',
+    'at.teacher':'ครู', 'at.date':'วันที่', 'at.kind':'ประเภท', 'at.days':'จำนวนวัน', 'at.mins':'จำนวนนาทีที่มาสาย', 'at.note':'หมายเหตุ',
+    'at.save':'บันทึกรายการ', 'at.void':'ยกเลิกรายการ', 'at.voidSure':'ยืนยันยกเลิก', 'at.summary':'สรุปตามครู', 'at.records':'รายการล่าสุด',
+    'at.none':'ยังไม่มีรายการ', 'at.unitDays':'{0} วัน', 'at.unitMin':'{0} นาที', 'at.cell':'{0} ครั้ง · {1}', 'at.by':'บันทึกโดย {0}',
+    'ad.title':'ที่อยู่อาศัย', 'ad.on':'พักในโรงเรียน', 'ad.off':'พักนอกโรงเรียน', 'ad.none':'ยังไม่ระบุ', 'ad.where':'บ้านพัก / ที่อยู่', 'ad.type':'ลักษณะที่พัก',
+    'ad.docs':'เอกสารเจ้าของบ้าน', 'ad.house':'บ้านพักเลขที่', 'ad.addr':'ที่อยู่', 'ad.landlord':'ชื่อเจ้าของบ้าน', 'ad.phone':'โทรศัพท์เจ้าของบ้าน',
+    'ad.save':'บันทึกที่อยู่', 'ad.pick':'— เลือกบ้านพัก —', 'ad.noList':'ยังไม่มีรายการบ้านพักในชีต Houses พิมพ์เลขที่ได้เลย', 'ad.occupied':'มีผู้พักอยู่: {0}',
+    'dc.HOUSE':'เอกสารที่พัก (เจ้าของบ้าน)',
+    'tr.title':'ออก-เข้าประเทศ และการลงที่พัก (ตม.30)', 'tr.exit':'วันออกนอกประเทศ', 'tr.return':'วันกลับเข้าประเทศ (ถ้ากลับแล้ว)', 'tr.note':'หมายเหตุ',
+    'tr.save':'บันทึกการเดินทาง', 'tr.abroad':'ยังไม่กลับ', 'tr.done':'ลงที่พักแล้ว {0}', 'tr.pending':'ยังไม่ได้ลงที่พัก (ตม.30)', 'tr.wait':'รอกลับเข้าประเทศ',
+    'tr.mark':'บันทึกว่าลงที่พักแล้ว', 'tr.markDate':'วันที่ลงที่พัก', 'tr.none':'ยังไม่มีบันทึกการเดินทาง', 'tr.edit':'แก้ไข',
+    'ty.tm30':'ลงที่พัก (ตม.30)', 'al.tm30':'กลับเข้าประเทศเมื่อ {0} วันก่อน ยังไม่ได้ลงที่พัก', 'ev.exit':'ออกนอกประเทศ · {0}', 'ev.return':'กลับเข้าประเทศ · {0}',
+    'err.DATE_NEED':'กรุณาระบุวันที่', 'err.TYPE_BAD':'ประเภทไม่ถูกต้อง', 'err.AMOUNT_BAD':'จำนวนไม่ถูกต้อง', 'err.HOUSE_REQ':'กรุณาเลือกบ้านพัก',
+    'err.HOUSE_BAD':'บ้านพักนี้ไม่อยู่ในรายการ', 'err.ADDR_REQ':'กรุณากรอกที่อยู่', 'err.EXIT_REQ':'กรุณาระบุวันออกนอกประเทศ',
+    'err.RANGE_BAD':'วันกลับต้องไม่ก่อนวันออก', 'err.NEED_RETURN':'ต้องบันทึกวันกลับเข้าประเทศก่อน'
+  });
+  Object.assign(T.en, {
+    'at.type.ABSENT':'Absent', 'at.type.PERSONAL_LEAVE':'Personal leave', 'at.type.SICK_LEAVE':'Sick leave', 'at.type.LATE':'Late',
+    'at.from':'From', 'at.to':'To', 'at.apply':'Apply', 'at.month':'This month', 'at.all':'All time', 'at.add':'Add a record',
+    'at.teacher':'Teacher', 'at.date':'Date', 'at.kind':'Type', 'at.days':'Number of days', 'at.mins':'Minutes late', 'at.note':'Note',
+    'at.save':'Save record', 'at.void':'Void', 'at.voidSure':'Confirm void', 'at.summary':'Summary by teacher', 'at.records':'Latest records',
+    'at.none':'No records yet', 'at.unitDays':'{0} day(s)', 'at.unitMin':'{0} min', 'at.cell':'{0}× · {1}', 'at.by':'recorded by {0}',
+    'ad.title':'Housing', 'ad.on':'On campus', 'ad.off':'Off campus', 'ad.none':'Not set', 'ad.where':'House / address', 'ad.type':'Housing',
+    'ad.docs':'Landlord documents', 'ad.house':'House number', 'ad.addr':'Address', 'ad.landlord':'Landlord name', 'ad.phone':'Landlord phone',
+    'ad.save':'Save address', 'ad.pick':'— choose a house —', 'ad.noList':'No houses are listed in the Houses sheet yet; type the number.', 'ad.occupied':'occupied by {0}',
+    'dc.HOUSE':'Housing documents (landlord)',
+    'tr.title':'Travel and TM.30 residence notice', 'tr.exit':'Departure date', 'tr.return':'Re-entry date (once back)', 'tr.note':'Note',
+    'tr.save':'Save trip', 'tr.abroad':'Not back yet', 'tr.done':'TM.30 done {0}', 'tr.pending':'TM.30 not recorded', 'tr.wait':'Waiting for re-entry',
+    'tr.mark':'Mark TM.30 as done', 'tr.markDate':'Date recorded', 'tr.none':'No trips recorded', 'tr.edit':'Edit',
+    'ty.tm30':'TM.30 residence notice', 'al.tm30':'Returned {0} day(s) ago, notice not recorded', 'ev.exit':'Departs · {0}', 'ev.return':'Returns · {0}',
+    'err.DATE_NEED':'Please enter the date.', 'err.TYPE_BAD':'Invalid type.', 'err.AMOUNT_BAD':'Invalid amount.', 'err.HOUSE_REQ':'Please choose a house.',
+    'err.HOUSE_BAD':'This house is not in the list.', 'err.ADDR_REQ':'Please enter the address.', 'err.EXIT_REQ':'Please enter the departure date.',
+    'err.RANGE_BAD':'Re-entry cannot be before departure.', 'err.NEED_RETURN':'Record the re-entry date first.'
+  });
+  let lang = 'th', theme = 'dark';
+  try { lang = localStorage.getItem('rav_lang') === 'en' ? 'en' : 'th'; theme = localStorage.getItem('rav_theme') === 'light' ? 'light' : 'dark'; } catch (e) {}
+  function t(k) {
+    let s = T[lang][k] !== undefined ? T[lang][k] : (T.th[k] !== undefined ? T.th[k] : k);
+    for (let i = 1; i < arguments.length; i++) s = s.split('{' + (i - 1) + '}').join(arguments[i]);
+    return s;
+  }
+  const $ = id => document.getElementById(id);
+  const loc = () => lang === 'th' ? 'th-TH' : 'en-GB';
+
+  function applyStatic() {
+    document.documentElement.lang = lang; document.documentElement.dataset.theme = theme;
+    document.querySelectorAll('[data-i18n]').forEach(e => e.textContent = t(e.dataset.i18n));
+    document.querySelectorAll('.jsTheme').forEach(b => b.textContent = theme === 'dark' ? '☀ ' + t('sh.toBright') : '☾ ' + t('sh.toDark'));
+    document.querySelectorAll('.jsLang').forEach(b => b.textContent = lang === 'th' ? 'EN' : 'TH');
+    document.title = t('app.title');
+  }
+
+  /* ================= ตัวช่วยสร้างหน้าจอ ================= */
+  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+  const G = 'var(--good)', W = 'var(--warn)', B = 'var(--bad)', A = 'var(--accent)', V = 'var(--violet)', M = 'var(--mute)';
+  const STC = { DRAFT:'#8FA3BF', SUBMITTED:'#FFB020', APPROVED:'#35D49A', RETURNED:'#FF5C7A' };
+  const PILL = { DRAFT:'mute', SUBMITTED:'warn', APPROVED:'good', RETURNED:'bad' };
+
+  function h(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+  function row(cls, kids) { const r = h('div', 'row ' + cls); kids.forEach(k => r.append(k)); return r; }
+  function btn(text, cls, fn) { const b = h('button', 'btn ' + cls, text); b.type = 'button'; b.onclick = fn; return b; }
+  function errText(r) { return r.code ? t('err.' + r.code, r.min) : (r.message || ''); }
+
+  function kpi(label, value, sub, color, bar) {
+    const c = h('div', 'card kpi'); c.style.setProperty('--c', color);
+    c.append(h('span', 'lbl', label), h('b', 'val', String(value)));
+    if (sub) c.append(h('small', '', sub));
+    if (bar !== undefined) { const m = h('div', 'meter'), i = h('i'); i.style.width = bar + '%'; i.style.background = color; m.append(i); c.append(m); }
+    return c;
+  }
+  function hero(title, chips, items) {
+    const l = h('div', 'card heroL'); l.append(h('h1', '', title));
+    const ch = h('div', 'chips'); chips.forEach(x => ch.append(h('span', '', x))); l.append(ch);
+    return row('hero', [l].concat(items.map(i => kpi(i[0], i[1], i[2], i[3], i[4]))));
+  }
+  function barRow(label, p, color) {
+    const r = h('div', 'brow'), tp = h('div', 'btop'), m = h('div', 'meter'), i = h('i');
+    tp.append(h('span', '', label), h('b', '', p + '%')); i.style.width = p + '%'; i.style.background = color; m.append(i); r.append(tp, m); return r;
+  }
+  function donut(title, p, center, bars, color) {
+    const c = h('section', 'card'); c.append(h('h2', '', title));
+    const ring = h('div', 'ring');
+    ring.style.background = 'conic-gradient(' + color + ' 0 ' + p + '%, rgba(155,176,204,.25) ' + p + '% 100%)';
+    const mid = h('b', '', p + '%'); mid.append(h('small', '', center)); ring.append(mid);
+    c.append(ring); bars.forEach(b => c.append(barRow(b.label, b.pct, color))); return c;
+  }
+  function stacked(cats) {
+    const c = h('section', 'card'); c.append(h('h2', '', t('ov.byCat')));
+    const max = Math.max.apply(null, cats.map(x => x.total)), HH = 190;
+    if (!max) { c.append(h('div', 'empty', t('ov.noItems'))); return c; }
+    const cols = h('div', 'cols');
+    cats.forEach(x => {
+      const col = h('div', 'col'), stack = h('div', 'stack');
+      ['APPROVED', 'SUBMITTED', 'RETURNED', 'DRAFT'].forEach(k => {
+        if (!x.counts[k]) return;
+        const s = h('i'); s.style.height = (x.counts[k] / max * HH) + 'px'; s.style.background = STC[k];
+        s.title = t('st.' + k) + ' ' + x.counts[k]; stack.append(s);
+      });
+      col.append(h('em', '', String(x.total)), stack, h('span', '', t('cat.' + x.key))); cols.append(col);
+    });
+    const lg = h('div', 'legend');
+    Object.keys(STC).forEach(k => { const s = h('span'), i = h('i'); i.style.background = STC[k]; s.append(i, t('st.' + k)); lg.append(s); });
+    c.append(cols, lg); return c;
+  }
+  function table(title, head, rows, cls) {
+    const c = h('section', 'card ' + cls); c.append(h('h2', '', title));
+    if (!rows || !rows.length) { c.append(h('div', 'empty', t('c.nodata'))); return c; }
+    const w = h('div', 'scroll'), tb = h('table'), hd = h('tr');
+    head.forEach(x => hd.append(h('th', '', x))); const th = h('thead'); th.append(hd); tb.append(th);
+    const body = h('tbody');
+    rows.forEach(r => {
+      const tr = h('tr'); r.cells.forEach((v, i) => tr.append(h('td', i ? '' : 'nm', v)));
+      const td = h('td'); td.append(h('span', 'pill ' + r.tone, t('ts.' + r.status))); tr.append(td); body.append(tr);
+    });
+    tb.append(body); w.append(tb); c.append(w); return c;
+  }
+
+  /* ================= หน้าภาพรวม (หัวหน้า / ธุรการ / ผู้บริหาร) ================= */
+  const OVT = { dept:'ov.dept', hr:'ov.hr', overview_academic:'ov.academic', overview_hr:'ov.hr2' };
+  const CATK = ['MasterPlans', 'Scores', 'Activities', 'Exams'];
+
+  function academic(a, view, c) {
+    const ap = pct(a.all.APPROVED, a.total), sent = a.all.SUBMITTED + a.all.APPROVED;
+    c.append(hero(t(OVT[view]), [t('ov.chipT', a.teachers), t('ov.chipI', a.total)], [
+      [t('ov.apr'), ap + '%', t('ov.aprSub', a.all.APPROVED, a.total), G, ap],
+      [t('ov.pend'), a.all.SUBMITTED, t('ov.pendSub'), W],
+      [t('ov.ret'), a.all.RETURNED, a.all.RETURNED ? t('ov.retYes') : t('ov.retNo'), a.all.RETURNED ? B : G]]));
+    c.append(row('g4', [kpi(t('ov.teachers'), a.teachers, t('ov.people'), A), kpi(t('ov.total'), a.total, t('ov.items'), V),
+      kpi(t('ov.approved'), a.all.APPROVED, t('ov.items'), G), kpi(t('ov.draft'), a.all.DRAFT, t('ov.items'), M)]));
+    c.append(row('g3', [
+      stacked(a.cats),
+      donut(t('ov.aprCat'), ap, t('ov.centerApr'), a.cats.map(k => ({ label: t('cat.' + k.key), pct: pct(k.counts.APPROVED, k.total) })), G),
+      donut(t('ov.sentCat'), pct(sent, a.total), t('ov.centerSent'), a.cats.map(k => ({ label: t('cat.' + k.key), pct: pct(k.counts.SUBMITTED + k.counts.APPROVED, k.total) })), A)]));
+    if (a.table) c.append(table(t('ov.tblAll'), [t('col.teacher')].concat(CATK.map(k => t('cat.' + k)), [t('col.status')]), a.table, 'wide'));
+  }
+  function hrPart(x, view, c, withHero) {
+    const soon = x.types.reduce((s, k) => s + k.soon, 0), exp = x.types.reduce((s, k) => s + k.expired, 0);
+    const dated = x.types.reduce((s, k) => s + k.total, 0), valid = x.types.reduce((s, k) => s + k.valid, 0);
+    if (withHero) {
+      c.append(hero(t(OVT[view]), [t('ov.chipT', x.teachers), t('ov.chipW', x.expiryDays || 90)],
+        x.types.map(k => [t('hr.soon', t('ty.' + k.key)), k.soon, k.expired ? t('hr.expN', k.expired) : t('hr.expNone'), k.soon ? W : G])));
+      c.append(row('g4', [kpi(t('hr.staff'), x.teachers, t('ov.people'), A), kpi(t('hr.soonAll'), soon, t('ov.items'), soon ? W : G),
+        kpi(t('hr.expAll'), exp, t('ov.items'), exp ? B : G), kpi(t('hr.okPct'), pct(valid, dated) + '%', '', G, pct(valid, dated))]));
+    }
+    const d = donut(t('hr.donut'), pct(valid, dated), t('hr.center'), x.types.map(k => ({ label: t('ty.' + k.key), pct: pct(k.valid, k.total) })), V);
+    if (x.table) c.append(row('g3', [d, table(t('hr.table'), [t('col.teacher')].concat(x.types.map(k => t('ty.' + k.key)), [t('col.status')]), x.table, 'span2')]));
+    else c.append(row('g3', [d]));
+  }
+
+  /* ================= หน้าหลักของครู (A ปฏิทิน · B ความคืบหน้า · C ตารางสอน · D เอกสาร · E ขอเอกสาร) ================= */
+  const pad2 = n => String(n).padStart(2, '0');
+  function bkkToday() {
+    const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date()).split('-').map(Number);
+    return { y: p[0], m: p[1] - 1, d: p[2] };
+  }
+  function phCard(titleKey, descKey) {
+    const c = h('section', 'card'); c.append(h('h2', '', t(titleKey)), h('p', 'meta', t(descKey)), h('span', 'pill mute', t('ph.soon'))); return c;
+  }
+
+  function calendarCard(anns) {
+    const box = h('section', 'card'); box.append(h('h2', '', t('hm.cal')));
+    const td = bkkToday(); let y = td.y, m = td.m, sel = null;
+    const nav = h('div', 'calnav'), title = h('b'), grid = h('div', 'cal'), list = h('div', 'annlist');
+    const prev = btn('‹', 'ghost sm', () => { m--; if (m < 0) { m = 11; y--; } sel = null; draw(); }); prev.setAttribute('aria-label', t('hm.prev'));
+    const next = btn('›', 'ghost sm', () => { m++; if (m > 11) { m = 0; y++; } sel = null; draw(); }); next.setAttribute('aria-label', t('hm.next'));
+    nav.append(prev, title, next); box.append(nav, grid, list);
+    function draw() {
+      title.textContent = new Date(Date.UTC(y, m, 1)).toLocaleDateString(loc(), { month: 'long', year: 'numeric', timeZone: 'UTC' });
+      grid.textContent = '';
+      for (let i = 0; i < 7; i++) grid.append(h('div', 'wd', new Date(Date.UTC(2024, 0, 7 + i)).toLocaleDateString(loc(), { weekday: 'short', timeZone: 'UTC' })));
+      const first = new Date(Date.UTC(y, m, 1)).getUTCDay(), days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(), prefix = y + '-' + pad2(m + 1) + '-';
+      const has = {}; anns.forEach(a => { if (a.date.indexOf(prefix) === 0) has[a.date] = true; });
+      for (let i = 0; i < first; i++) grid.append(h('div', 'day blank'));
+      for (let d = 1; d <= days; d++) {
+        const key = prefix + pad2(d), b = h('button', 'day' + (has[key] ? ' has' : '') + (y === td.y && m === td.m && d === td.d ? ' today' : '') + (sel === key ? ' sel' : ''), String(d));
+        b.type = 'button'; b.onclick = () => { sel = sel === key ? null : key; draw(); }; grid.append(b);
+      }
+      list.textContent = '';
+      const shown = anns.filter(a => sel ? a.date === sel : a.date.indexOf(prefix) === 0).sort((p, q) => p.date < q.date ? -1 : 1);
+      if (!shown.length) list.append(h('div', 'empty', t('hm.noann')));
+      shown.forEach(a => { const e = h('div', 'ann'); e.append(h('b', '', a.title), h('small', '', a.date + (a.detail ? ' · ' + a.detail : ''))); list.append(e); });
+    }
+    draw(); return box;
+  }
+
+  function progressCard(a) {
+    const c = h('section', 'card'), total = a.total, sent = a.all.SUBMITTED + a.all.APPROVED, p = pct(sent, total);
+    c.append(h('h2', '', t('hm.prog')));
+    if (!total) { c.append(h('p', 'meta', t('hm.progNone'))); return c; }
+    const big = h('div', 'big', p + '%'), m = h('div', 'meter'), i = h('i');
+    i.style.width = p + '%'; i.style.background = A; m.append(i);
+    c.append(big, m, h('p', 'meta', t('hm.progSub', sent, total)));
+    if (a.all.RETURNED) c.append(h('span', 'pill bad', t('hm.progRet', a.all.RETURNED)));
+    return c;
+  }
+  function visaCard(hr) {
+    const c = h('section', 'card'); c.append(h('h2', '', t('hm.vis')));
+    const keys = ['contractEnd', 'workPermitExpiry', 'visaExpiry'];
+    if (!hr || !keys.some(k => hr[k])) { c.append(h('p', 'meta', t('hm.visNone'))); return c; }
+    keys.forEach(k => {
+      const r = h('div', 'vrow'), v = hr[k];
+      r.append(h('span', '', t('ty.' + k)));
+      if (!v) r.append(h('b', '', '–'));
+      else {
+        const dt = new Date(v.date + 'T00:00:00Z').toLocaleDateString(loc(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC'});
+        r.append(h('b', '', dt), h('span', 'pill ' + (v.days < 0 ? 'bad' : v.days <= 90 ? 'warn' : 'good'), v.days < 0 ? t('hm.expired') : t('hm.days', v.days)));
+      }
+      c.append(r);
+    });
+    return c;
+  }
+  function docsCard() {
+    const c = h('section', 'card'); c.append(h('h2', '', t('hm.docs')));
+    const l = h('div', 'docb');
+    ['hm.d1', 'hm.d2', 'hm.d3'].forEach(k => l.append(btn(t(k), 'ghost', () => go('ph:docreq'))));
+    c.append(l, h('span', 'pill mute', t('ph.soon'))); return c;
+  }
+  function teacherHome(d, c) {
+    const right = h('div', 'col1'); right.append(progressCard(d.academic), visaCard(d.myHr));
+    c.append(row('hm', [calendarCard(d.announcements || []), right]));
+    c.append(row('g2', [phCard('hm.tt', 'ph.tt'), docsCard()]));
+  }
+
+  /* ================= งานของครู (แผนการจัดการเรียนรู้ · คะแนน · ใบงาน · ข้อสอบ) ================= */
+  const KINDS = { Scores: ['PAA', 'MS1', 'PAB', 'FS1', 'PAC', 'MS2', 'PAD', 'FS2'], Exams: ['Midterm', 'Final'] }; // ต้องตรงกับ KINDS ใน Code.gs
+
+  function field(label, input) { const l = h('label', 'field'); l.append(h('span', '', label), input); return l; }
+  function inp(id, max, req) { const i = h('input'); i.type = 'text'; i.id = id; i.maxLength = max; if (req) i.required = true; return i; }
+
+  function makeEditor(cat, afterSave) {
+    const f = h('form', 'card'); f.hidden = true; f.autocomplete = 'off';
+    const ttl = h('h2'), fg = h('div', 'fg');
+    const subject = inp('edSubject', 100), klass = inp('edClass', 100), term = inp('edTerm', 50, true), title = inp('edTitleIn', 200, true), url = inp('edUrl', 1000);
+    let kind = null;
+    if (KINDS[cat]) {
+      kind = h('select'); KINDS[cat].forEach(k => { const o = h('option', '', t('k.' + k)); o.value = k; kind.append(o); });
+      fg.append(field(t(cat === 'Scores' ? 'wk.kindScore' : 'wk.kindExam'), kind));
+    }
+    fg.append(field(t('wk.subject'), subject), field(t('wk.class'), klass), field(t('wk.term'), term), field(t('wk.title'), title));
+    const msg = h('p', 'msg'); msg.setAttribute('role', 'alert');
+    const cancel = btn(t('wk.cancel'), 'ghost', () => close()), save = h('button', 'btn ghost', t('wk.saveDraft')); save.type = 'submit';
+    const send = btn(t('wk.saveSend'), 'main sm', () => doSave(true));
+    f.append(ttl, fg); if (cat === 'Scores') f.append(h('p', 'hint', t('wk.scoreHint')));
+    f.append(field(t('wk.url'), url), msg, (() => { const a = h('div', 'acts'); a.append(cancel, save, send); return a; })());
+    let editing = null;
+    function busy(b) { save.disabled = b; send.disabled = b; }
+    function close() { editing = null; f.hidden = true; }
+    function open(it) {
+      editing = it || null; ttl.textContent = it ? t('wk.editTitle') : t('wk.addTitle');
+      if (kind) kind.value = it && it.kind ? it.kind : KINDS[cat][0];
+      subject.value = it ? it.subject : ''; klass.value = it ? it['class'] : ''; term.value = it ? it.term : ''; title.value = it ? it.title : ''; url.value = it ? it.fileUrl : '';
+      msg.textContent = ''; f.hidden = false; f.scrollIntoView({ block: 'nearest' }); title.focus();
+    }
+    function doSave(andSend) {
+      if (!f.reportValidity()) return;
+      msg.textContent = ''; busy(true);
+      const item = { id: editing ? editing.id : '', subject: subject.value, class: klass.value, term: term.value, kind: kind ? kind.value : '', title: title.value, fileUrl: url.value };
+      api('saveWork', [cat, item], r => {
+        if (!r.ok) { busy(false); msg.textContent = errText(r); return; }
+        if (!andSend) { busy(false); close(); afterSave(); return; }
+        api('submitWork', [cat, r.id], r2 => {
+          busy(false);
+          if (r2.ok) { close(); afterSave(); return; }
+          editing = { id: r.id, category: cat }; msg.textContent = t('wk.savedNoSend') + errText(r2); afterSave();
+        });
+      });
+    }
+    f.onsubmit = e => { e.preventDefault(); doSave(false); };
+    return { form: f, open: open };
+  }
+
+  function workCard(it, mode, ctx) {
+    const c = h('div', 'card item'), top = h('div', 'itop');
+    top.append(h('span', 'cat', t('cat.' + it.category)), h('b', '', it.title), h('span', 'pill ' + (PILL[it.status] || 'mute'), t('st.' + it.status)));
+    c.append(top);
+    c.append(h('div', 'meta', [mode === 'rev' ? it.teacher : '', it.subject, it['class'], it.term, it.kind].filter(Boolean).join(' · ')));
+    if (/^https:\/\//i.test(it.fileUrl)) { const a = h('a', 'lnk', t('wk.openFile')); a.href = it.fileUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; c.append(a); }
+    else c.append(h('div', 'meta', t('wk.noLink')));
+    if (it.note) c.append(h('div', 'note', t('wk.note') + (it.reviewedBy ? ' (' + it.reviewedBy + ')' : '') + ': ' + it.note));
+    if (mode === 'mine') {
+      const acts = h('div', 'acts');
+      if (it.status === 'DRAFT' || it.status === 'RETURNED') {
+        acts.append(btn(t('wk.edit'), 'ghost', () => ctx.ed.open(it)),
+          btn(t('wk.submit'), 'main sm', () => api('submitWork', [it.category, it.id], r => { ctx.refresh(); ctx.msg.textContent = r.ok ? '' : errText(r); })));
+        if (it.status === 'DRAFT') {
+          const del = btn(t('wk.del'), 'ghost', () => {
+            if (!del.dataset.sure) { del.dataset.sure = '1'; del.textContent = t('wk.delSure'); del.classList.add('bad'); return; }
+            api('deleteWork', [it.category, it.id], r => { ctx.refresh(); ctx.msg.textContent = r.ok ? '' : errText(r); });
+          });
+          acts.append(del);
+        }
+      } else acts.append(h('small', '', it.status === 'SUBMITTED' ? t('wk.sentAt', it.submittedAt) : t('wk.reviewedAt', it.reviewedAt)));
+      c.append(acts);
+    } else {
+      const ta = h('textarea'); ta.rows = 2; ta.maxLength = 500; ta.placeholder = t('rv.ph');
+      const msg = h('p', 'msg'), acts = h('div', 'acts');
+      const decide = d => {
+        msg.textContent = '';
+        if (d === 'RETURNED' && !ta.value.trim()) { msg.textContent = t('err.REASON_REQ'); return; }
+        api('reviewWork', [it.category, it.id, d, ta.value], r => { if (r.ok) ctx.refresh(); else msg.textContent = errText(r); });
+      };
+      acts.append(btn(t('rv.return'), 'bad', () => decide('RETURNED')), btn(t('rv.approve'), 'good', () => decide('APPROVED')));
+      c.append(ta, msg, acts);
+    }
+    return c;
+  }
+
+  function loadWork(cat) {
+    const wrap = h('div', 'lst'), bar = h('div', 'bar'), msg = h('p', 'msg'), list = h('div', 'lst');
+    msg.setAttribute('role', 'alert');
+    let ed;
+    const refresh = () => {
+      list.replaceChildren(h('div', 'loading', t('wk.loading')));
+      api('listWork', ['mine'], items => {
+        list.textContent = ''; items = items.filter(i => i.category === cat);
+        if (!items.length) { list.append(h('div', 'card empty', t('wk.empty'))); return; }
+        items.forEach(it => list.append(workCard(it, 'mine', { ed: ed, msg: msg, refresh: refresh })));
+      });
+    };
+    ed = makeEditor(cat, refresh);
+    bar.append(h('h2', 'pageh', t('cat.' + cat)), btn(t('wk.add'), 'main sm', () => ed.open(null)));
+    wrap.append(bar, msg, ed.form, list); $('content').replaceChildren(wrap); refresh();
+  }
+  function loadRev() {
+    const box = h('div', 'lst'); $('content').replaceChildren(box);
+    const refresh = () => api('listWork', ['pending'], items => {
+      box.textContent = ''; setBadge(items.length);
+      box.append(h('h2', 'pageh', t('rv.title', items.length)));
+      if (!items.length) { box.append(h('div', 'card empty', t('rv.empty'))); return; }
+      items.forEach(it => box.append(workCard(it, 'rev', { refresh: refresh })));
+    });
+    refresh();
+  }
+  function renderPh(key) {
+    const c = h('section', 'card');
+    const hrk = HR_LATER.indexOf(key) >= 0;
+    const title = hrk ? t('nav.' + key) : key === 'docreq' ? t('nav.docreq') : t('cur.' + key);
+    c.append(h('h2', 'pageh', title), h('p', 'meta', hrk ? t('ph.hr.' + key) : key === 'docreq' ? t('ph.docreq') : key === 'c1' ? t('ph.c1') : t('ph.pdf')), h('span', 'pill mute', t('ph.soon')));
+    $('content').replaceChildren(c);
+  }
+
+  /* ================= เมนูซ้าย / การนำทาง ================= */
+  let token = null, forced = false, curPage = 'home', me = null, perms = {}, openGroup = true, t0 = null;
+  const saveTok = v => { try { v ? sessionStorage.setItem('rav_t', v) : sessionStorage.removeItem('rav_t'); } catch (e) {} };
+  const loadTok = () => { try { return sessionStorage.getItem('rav_t'); } catch (e) { return null; } };
+  const LEVEL = { TIER_B: 5, HEAD: 4, LIAISON: 3, HR: 2, TEACHER: 1 };
+
+  function api(fn, args, ok) {
+    const r = google.script.run.withSuccessHandler(ok).withFailureHandler(onFail);
+    r[fn].apply(r, [token].concat(args));
+  }
+  function setBadge(n) { const b = $('badge'); if (b) { b.textContent = n; b.hidden = !n; } }
+  function closeSide() { $('side').classList.remove('open'); $('scrim').hidden = true; }
+
+  function navItem(id, label, cls) {
+    const b = h('button', 'nav ' + (cls || ''), label); b.type = 'button'; b.dataset.page = id; b.onclick = () => go(id); return b;
+  }
+  function renderNav() {
+    const nav = $('nav'); nav.textContent = '';
+    nav.append(navItem('home', me.view === 'teacher' ? t('nav.home') : t('nav.overview')));
+    if (perms.staff) {
+      nav.append(navItem('staff', t('nav.staff')), navItem('profiles', t('nav.profiles')), navItem('attend', t('nav.attend')), navItem('addr', t('nav.addr')));
+      if (perms.manageStaff) nav.append(navItem('addstaff', t('nav.addStaff')));
+      nav.append(navItem('former', t('nav.former')));
+      if (perms.editStaff) laterGroup(nav);
+    }
+    if (perms.submit) {
+      const g = h('button', 'nav', t('nav.curriculum')); g.type = 'button'; g.setAttribute('aria-expanded', String(openGroup));
+      g.append(h('span', 'chev', openGroup ? '▾' : '▸'));
+      const box = h('div'); box.hidden = !openGroup;
+      g.onclick = () => { openGroup = !openGroup; box.hidden = !openGroup; g.setAttribute('aria-expanded', String(openGroup)); g.lastChild.textContent = openGroup ? '▾' : '▸'; };
+      [['ph:c1', 'cur.c1'], ['ph:c2', 'cur.c2'], ['ph:c3', 'cur.c3'], ['ph:c4', 'cur.c4'], ['ph:c5', 'cur.c5'],
+       ['work:MasterPlans', 'cat.MasterPlans'], ['work:Scores', 'cat.Scores'], ['work:Activities', 'cat.Activities'], ['work:Exams', 'cat.Exams']]
+        .forEach((x, i) => box.append(navItem(x[0], (i + 1) + '. ' + t(x[1]), 'sub')));
+      nav.append(g, box, navItem('ph:docreq', t('nav.docreq')));
+    }
+    if (perms.review) { const b = navItem('rev', t('nav.review')); const bd = h('span', 'badge', '0'); bd.id = 'badge'; bd.hidden = true; b.append(bd); nav.append(b); }
+    markNav();
+  }
+  function markNav() { document.querySelectorAll('.nav[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === curPage)); }
+
+  function renderTop() {
+    $('meName').textContent = me.name; $('gName').textContent = me.name;
+    $('gSub').textContent = me.userId + ' · ' + t('sh.level', LEVEL[me.role] || '') + ' · ' + t('role.' + me.role); setGreeting(); syncTop();
+    $('meSub').textContent = me.userId + ' · ' + t('sh.level', LEVEL[me.role] || '') + ' · ' + t('role.' + me.role);
+  }
+  function renderHome(d) {
+    const c = $('content'); c.textContent = '';
+    if (d.view === 'teacher') teacherHome(d, c);
+    else { if (d.academic) academic(d.academic, d.view, c); if (d.hr) hrPart(d.hr, d.view, c, !d.academic); }
+    $('foot').textContent = t('c.foot', d.generated) + ' · ' + t('c.ver', d.version);
+  }
+  function applyMe(d) {
+    me = { name: d.name, userId: d.userId, role: d.role, view: d.view }; perms = d.perms || {};
+    document.body.className = d.view; $('rightp').hidden = d.view !== 'hr';
+  }
+
+  function go(page) {
+    curPage = page || 'home'; closeSide(); markNav();
+    $('content').replaceChildren(h('div', 'loading', t('wk.loading')));
+    if (curPage === 'home') api('getDashboardData', [], d => { applyMe(d); renderTop(); renderHome(d); setBadge(d.academic && perms.review ? d.academic.all.SUBMITTED : 0); });
+    else if (curPage === 'rev') loadRev();
+    else if (curPage.indexOf('work:') === 0) loadWork(curPage.slice(5));
+    else if (curPage.indexOf('ph:') === 0) renderPh(curPage.slice(3));
+    else if (curPage === 'staff') loadStaffTable();
+    else if (curPage === 'profiles') loadProfiles();
+    else if (curPage.indexOf('profile:') === 0) loadProfile(curPage.slice(8));
+    else if (curPage.indexOf('cal:') === 0) loadCal(curPage.slice(4));
+    else if (curPage === 'attend') loadAttendance('', '');
+    else if (curPage === 'addr') loadAddresses();
+    else if (curPage === 'addstaff') loadAddStaff();
+    else if (curPage === 'former') loadFormer();
+  }
+  function loadApp() {
+    show('sApp'); if (!t0) { t0 = Date.now(); try { sessionStorage.setItem('rav_t0', String(t0)); } catch (e) {} }
+    api('getDashboardData', [], d => { applyMe(d); renderTop(); renderNav(); renderHome(d); setBadge(d.academic && perms.review ? d.academic.all.SUBMITTED : 0); curPage = 'home'; markNav(); afterLogin(); });
+  }
+
+  /* ================= Login / เปลี่ยนรหัส / Session ================= */
+  function show(id) { ['sLogin', 'sChange', 'sApp'].forEach(s => $(s).hidden = (s !== id)); window.scrollTo(0, 0); }
+  function toLogin(msgKey) {
+    token = null; saveTok(null); t0 = null; try { sessionStorage.removeItem('rav_t0'); sessionStorage.removeItem('rav_pop'); } catch (e) {}
+    document.body.className = ''; $('lgPin').value = ''; $('lgMsg').textContent = msgKey ? t(msgKey) : ''; show('sLogin'); $('lgId').focus();
+  }
+  function toChange(isForced) {
+    forced = isForced;
+    $('chTitle').textContent = t(isForced ? 'ch.title' : 'ch.titleOpt'); $('chSub').textContent = t(isForced ? 'ch.subForced' : 'ch.subOpt');
+    $('chCancel').hidden = isForced; ['chOld', 'chNew', 'chNew2'].forEach(i => $(i).value = ''); $('chMsg').textContent = '';
+    show('sChange'); $('chOld').focus();
+  }
+  function onFail(err) {
+    const m = String((err && err.message) || err);
+    if (m.indexOf('SESSION_EXPIRED') >= 0) return toLogin('lg.expired');
+    if (m.indexOf('MUST_CHANGE_PIN') >= 0) return toChange(true);
+    $('content').replaceChildren(h('div', 'loading err', t('c.err') + m));
+  }
+
+  $('lgShow').onchange = e => $('lgPin').type = e.target.checked ? 'text' : 'password';
+  $('fLogin').onsubmit = e => {
+    e.preventDefault(); $('lgMsg').textContent = ''; $('lgBtn').disabled = true;
+    google.script.run.withSuccessHandler(r => {
+      $('lgBtn').disabled = false;
+      if (!r.ok) { $('lgMsg').textContent = errText(r); $('lgPin').value = ''; $('lgPin').focus(); return; }
+      token = r.token; saveTok(token); $('lgPin').value = '';
+      r.mustChange ? toChange(true) : loadApp();
+    }).withFailureHandler(err => { $('lgBtn').disabled = false; $('lgMsg').textContent = t('lg.net') + (err.message || err); })
+      .login($('lgId').value, $('lgPin').value);
+  };
+  $('fChange').onsubmit = e => {
+    e.preventDefault(); $('chMsg').textContent = '';
+    if ($('chNew').value !== $('chNew2').value) { $('chMsg').textContent = t('ch.mismatch'); return; }
+    $('chBtn').disabled = true;
+    google.script.run.withSuccessHandler(r => {
+      $('chBtn').disabled = false;
+      if (!r.ok) { $('chMsg').textContent = errText(r); return; }
+      loadApp();
+    }).withFailureHandler(err => { $('chBtn').disabled = false; onFail(err); }).changePin(token, $('chOld').value, $('chNew').value);
+  };
+  $('chCancel').onclick = () => show('sApp');
+  $('btnPw').onclick = () => { closeSide(); toChange(false); };
+  $('btnOut').onclick = () => { google.script.run.logout(token); toLogin('lg.out'); };
+  $('burger').onclick = () => { $('side').classList.add('open'); $('scrim').hidden = false; };
+  $('scrim').onclick = closeSide;
+
+  /* ธีม + ภาษา */
+  function persist() { try { localStorage.setItem('rav_lang', lang); localStorage.setItem('rav_theme', theme); } catch (e) {} }
+  document.querySelectorAll('.jsTheme').forEach(b => b.onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; persist(); applyStatic(); });
+  document.querySelectorAll('.jsLang').forEach(b => b.onclick = () => {
+    lang = lang === 'th' ? 'en' : 'th'; persist(); applyStatic();
+    if (!$('sApp').hidden && me) { renderTop(); renderNav(); renderAlerts(); renderMiniCal(); go(curPage); }
+    else if (!$('sChange').hidden) { $('chTitle').textContent = t(forced ? 'ch.title' : 'ch.titleOpt'); $('chSub').textContent = t(forced ? 'ch.subForced' : 'ch.subOpt'); }
+  });
+
+  /* ================= โมดูลคุณกิตติพันธ์ (HR Admin): ปฏิทิน · แจ้งเตือน · โปรไฟล์ครูต่างชาติ ================= */
+  const HR_LATER = ['contract', 'docs', 'check', 'notes'];
+  let hrData = { alerts: [], events: [] }, calState = null, openLater = false;
+
+  function bkkHour() {
+    if (window.__hour !== undefined) return window.__hour; // ใช้ตอนทดสอบเท่านั้น
+    return parseInt(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Asia/Bangkok' }).format(new Date()), 10) % 24;
+  }
+  function setGreeting() {
+    const hr = bkkHour(), g = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening', e = $('gHello');
+    if (e && e.textContent !== g) e.textContent = g;
+  }
+  function syncTop() { document.documentElement.style.setProperty('--topH', $('top').offsetHeight + 'px'); }
+  window.addEventListener('resize', syncTop);
+  function fmtD(s) { return s ? new Date(s + 'T00:00:00Z').toLocaleDateString(loc(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '–'; }
+
+  function showModal(msg) { $('mdMsg').textContent = msg; $('modal').hidden = false; $('mdOk').focus(); }
+  $('mdOk').onclick = () => { $('modal').hidden = true; };
+
+  function afterLogin() {
+    syncTop();
+    if (perms.calendar) loadHrData();
+    let shown = false; try { shown = !!sessionStorage.getItem('rav_pop'); } catch (e) {}
+    if (me.role === 'HR' && bkkHour() >= 18 && !shown) { try { sessionStorage.setItem('rav_pop', '1'); } catch (e) {} showModal(t('md.late')); }
+  }
+  function loadHrData() { api('getHrAlerts', [], r => { hrData = r; renderMiniCal(); renderAlerts(); }); }
+
+  function renderAlerts() {
+    const box = $('alerts'); box.textContent = '';
+    if (!hrData.alerts.length) { box.append(h('p', 'meta', t('al.none'))); return; }
+    hrData.alerts.forEach(a => {
+      const b = h('button', 'alert ' + a.level); b.type = 'button';
+      const sub = a.kind === 'tm30' ? t('al.tm30', Math.abs(a.days)) : (a.days < 0 ? t('hm.expired') : t('hm.days', a.days));
+      b.append(h('b', '', t('ty.' + a.kind) + ' · ' + a.name), h('small', '', fmtD(a.date) + ' — ' + sub));
+      if (perms.staff) b.onclick = () => go('profile:' + a.staffId);
+      box.append(b);
+    });
+  }
+
+  function renderMiniCal() {
+    const box = $('miniCal'); box.textContent = ''; box.hidden = !perms.calendar;
+    if (!perms.calendar) return;
+    const td = bkkToday(); if (!calState) calState = { y: td.y, m: td.m };
+    const nav = h('div', 'calnav'), title = h('b'), grid = h('div', 'cal');
+    const prev = btn('‹', 'ghost sm', () => { calState.m--; if (calState.m < 0) { calState.m = 11; calState.y--; } renderMiniCal(); });
+    const next = btn('›', 'ghost sm', () => { calState.m++; if (calState.m > 11) { calState.m = 0; calState.y++; } renderMiniCal(); });
+    prev.setAttribute('aria-label', t('hm.prev')); next.setAttribute('aria-label', t('hm.next'));
+    nav.append(prev, title, next); box.append(nav, grid);
+    const y = calState.y, m = calState.m;
+    title.textContent = new Date(Date.UTC(y, m, 1)).toLocaleDateString(loc(), { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    for (let i = 0; i < 7; i++) grid.append(h('div', 'wd', new Date(Date.UTC(2024, 0, 7 + i)).toLocaleDateString(loc(), { weekday: 'narrow', timeZone: 'UTC' })));
+    const first = new Date(Date.UTC(y, m, 1)).getUTCDay(), days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(), prefix = y + '-' + pad2(m + 1) + '-';
+    const has = {}; hrData.events.forEach(e => { if (e.date.indexOf(prefix) === 0) has[e.date] = true; });
+    for (let i = 0; i < first; i++) grid.append(h('div', 'day blank'));
+    for (let d = 1; d <= days; d++) {
+      const key = prefix + pad2(d);
+      const b = h('button', 'day' + (has[key] ? ' has' : '') + (y === td.y && m === td.m && d === td.d ? ' today' : '') + (curPage === 'cal:' + key ? ' sel' : ''), String(d));
+      b.type = 'button'; b.onclick = () => go('cal:' + key); grid.append(b);
+    }
+  }
+  function loadCal(key) {
+    renderMiniCal();
+    const c = h('section', 'card'), l = h('div', 'lst'), evs = hrData.events.filter(e => e.date === key);
+    c.append(h('h2', 'pageh', t('cal.title', fmtD(key))));
+    if (!evs.length) l.append(h('p', 'empty', t('cal.none')));
+    evs.forEach(e => { const b = btn(evText(e), 'ghost', () => { if (perms.staff) go('profile:' + e.staffId); }); b.style.textAlign = 'left'; l.append(b); });
+    c.append(l); $('content').replaceChildren(c);
+  }
+
+  function laterGroup(nav) {
+    const g = h('button', 'nav', t('nav.later')); g.type = 'button'; g.setAttribute('aria-expanded', String(openLater)); g.append(h('span', 'chev', openLater ? '▾' : '▸'));
+    const box = h('div'); box.hidden = !openLater;
+    g.onclick = () => { openLater = !openLater; box.hidden = !openLater; g.setAttribute('aria-expanded', String(openLater)); g.lastChild.textContent = openLater ? '▾' : '▸'; };
+    HR_LATER.forEach(k => box.append(navItem('ph:' + k, t('nav.' + k), 'sub')));
+    nav.append(g, box);
+  }
+
+  /* --- ตารางรวม / การ์ดโปรไฟล์ / โปรไฟล์ละเอียด --- */
+  function staffStatus(s) {
+    if (!s.hasProfile) return ['NO_DATA', 'mute'];
+    const all = [s.wpDays, s.contractDays, s.visaDays, s.passportDays].filter(x => x !== null);
+    if (!all.length) return ['NO_DATA', 'mute'];
+    if (all.some(x => x < 0)) return ['EXPIRED', 'bad'];
+    if ([s.wpDays, s.contractDays, s.visaDays].some(x => x !== null && x <= 90) || (s.passportDays !== null && s.passportDays <= 180)) return ['SOON', 'warn'];
+    return ['OK', 'good'];
+  }
+  const initial = s => (s.name || '?').trim().charAt(0).toUpperCase();
+
+  function loadStaffTable() {
+    api('listStaff', [], r => {
+      const rows = r.staff.map(s => { const st = staffStatus(s);
+        return { cells: [s.name, s.nationality || '–', s.age === null ? '–' : String(s.age), s.passportNo || '–', s.wpNo || '–', fmtD(s.workPermitExpiry), s.notes || '–'], status: st[0], tone: st[1] }; });
+      $('content').replaceChildren(table(t('sf.table'), [t('col.teacher'), t('col.nat'), t('col.age'), t('col.passport'), t('col.wpno'), t('col.wpexp'), t('col.notes'), t('col.status')], rows, 'wide'));
+    });
+  }
+  let photoCache = null, photoAt = 0; // เก็บรูปไว้ 1 นาที แล้วดึงใหม่ (เผื่อมีคนอัปโหลดรูปจากเครื่องอื่น)
+  function loadPhotos(cb) { if (photoCache && Date.now() - photoAt < 60000) { cb(); return; } api('getPhotos', [], m => { photoCache = m || {}; photoAt = Date.now(); cb(); }); }
+  function avatarEl(s, cls) {
+    const m = photoCache && photoCache[s.staffId];
+    if (m) { const i = h('img', 'avatar ' + (cls || '')); i.src = m; i.alt = ''; return i; }
+    return h('span', 'avatar ' + (cls || ''), initial(s));
+  }
+  function loadProfiles() {
+    api('listStaff', [], r => loadPhotos(() => {
+      if (!r.staff.length) { const e = h('div', 'lst'); e.append(h('div', 'card empty', t('sf.empty'))); if (perms.manageStaff) e.append(btn(t('pf.add'), 'main sm', () => go('addstaff'))); $('content').replaceChildren(e); return; }
+      const g = h('div', 'pgrid'), wrap = h('div', 'lst');
+      r.staff.forEach(s => {
+        const c = h('button', 'card pcard'), st = staffStatus(s); c.type = 'button';
+        c.append(avatarEl(s), h('b', '', s.name), h('small', '', s.nationality || '–'), h('span', 'pill ' + st[1], t('ts.' + st[0])));
+        c.onclick = () => go('profile:' + s.staffId); g.append(c);
+      });
+      const bar = h('div', 'bar'); bar.append(h('h2', 'pageh', t('nav.profiles')));
+      if (perms.manageStaff) bar.append(btn(t('pf.add'), 'main sm', () => go('addstaff')));
+      wrap.append(bar, g); $('content').replaceChildren(wrap);
+    }));
+  }
+
+  const PF = [['nationality', 'text'], ['dob', 'date'], ['passportNo', 'text'], ['passportExpiry', 'date'], ['visaType', 'text'], ['visaNo', 'text'],
+              ['visaExpiry', 'date'], ['wpNo', 'text'], ['workPermitExpiry', 'date'], ['contractStart', 'date'], ['contractEnd', 'date'], ['position', 'text'], ['duties', 'text']];
+
+  function profileView(s) {
+    const dl = h('dl', 'dl');
+    PF.forEach(k => dl.append(h('dt', '', t('pf.' + k[0])), h('dd', '', k[1] === 'date' ? fmtD(s[k[0]]) : (s[k[0]] || '–'))));
+    if ('salary' in s) dl.append(h('dt', '', t('pf.salary')), h('dd', '', s.salary === '' ? '–' : Number(s.salary).toLocaleString(loc())));
+    dl.append(h('dt', '', t('pf.notes')), h('dd', '', s.notes || '–'));
+    return dl;
+  }
+  function profileForm(s) {
+    const f = h('form'), fg = h('div', 'fg'), els = {}; f.autocomplete = 'off';
+    PF.forEach(k => { const i = h('input'); i.type = k[1]; i.value = s[k[0]] || ''; if (k[1] === 'text') i.maxLength = 150; els[k[0]] = i; fg.append(field(t('pf.' + k[0]), i)); });
+    if ('salary' in s) { const i = h('input'); i.type = 'text'; i.inputMode = 'decimal'; i.value = s.salary === '' ? '' : String(s.salary); els.salary = i; fg.append(field(t('pf.salary'), i)); }
+    const notes = h('textarea'); notes.rows = 3; notes.maxLength = 1000; notes.value = s.notes || ''; els.notes = notes;
+    const msg = h('p', 'msg'), save = h('button', 'btn main sm', t('pf.save')), a = h('div', 'acts'); msg.setAttribute('role', 'alert'); save.type = 'submit'; a.append(save);
+    f.append(fg, field(t('pf.notes'), notes), msg, a);
+    f.onsubmit = e => {
+      e.preventDefault(); msg.textContent = ''; msg.style.color = ''; save.disabled = true;
+      const item = { staffId: s.staffId }; Object.keys(els).forEach(k => item[k] = els[k].value);
+      api('saveStaff', [item], r => {
+        save.disabled = false;
+        if (!r.ok) { msg.textContent = errText(r); return; }
+        msg.style.color = 'var(--good)'; msg.textContent = t('pf.saved'); loadHrData();
+      });
+    };
+    return f;
+  }
+  function loadProfile(id) {
+    api('getStaff', [id], r => loadPhotos(() => {
+      if (!r.ok) { $('content').replaceChildren(h('div', 'loading err', errText(r))); return; }
+      const s = r.staff, wrap = h('div', 'lst'), card = h('section', 'card'), head = h('div', 'itop');
+      const back = btn(t('pf.back'), 'ghost sm', () => go(r.former ? 'former' : 'profiles')); back.style.width = 'fit-content';
+      head.append(avatarEl(s, 'lg'), h('h2', 'pageh', s.name));
+      if (s.age !== null) head.append(h('span', 'pill mute', t('pf.age', s.age)));
+      if (r.former) head.append(h('span', 'pill bad', r.resignDate ? t('ac.resigned', fmtD(r.resignDate)) : t('fm.noDate')));
+      if (r.canEdit) head.append(photoPicker(s));
+      card.append(head, h('p', 'hint', t('pf.sens')), r.canEdit ? profileForm(s) : profileView(s));
+      wrap.append(back, card);
+      if (r.canManage) wrap.append(accountSection(s));
+      wrap.append(attendanceCard(s), addressSection(s), tripsSection(s), docsSection(s, r.canEdit)); $('content').replaceChildren(wrap);
+    }));
+  }
+
+  /* --- รูปถ่าย + เอกสารสแกน (พาสปอร์ต · วีซ่า · ใบอนุญาตทำงาน) --- */
+  const MAX_PDF_BYTES = 8 * 1024 * 1024;
+  const DOC_FIELDS = {
+    PASSPORT: [['docNo', 'dc.number', 'text'], ['expiry', 'dc.expiry', 'date']],
+    VISA: [['docType', 'dc.visaType', 'text'], ['docNo', 'dc.number', 'text'], ['expiry', 'dc.expiry', 'date']],
+    WP: [['docNo', 'dc.number', 'text'], ['expiry', 'dc.expiry', 'date']],
+    HOUSE: []
+  };
+  function b64Of(file, ok, fail) { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(',')[1] || ''); fr.onerror = fail; fr.readAsDataURL(file); }
+  function resizeImage(file, max, ok, fail) { // ย่อรูปให้เล็กก่อนส่ง (JPEG) เพื่ออัปโหลดเร็วและประหยัดที่เก็บ
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      ok(c.toDataURL('image/jpeg', 0.85).split(',')[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); fail(); };
+    img.src = url;
+  }
+  function photoPicker(s) {
+    const box = h('div'), file = h('input'), msg = h('small', '');
+    file.type = 'file'; file.accept = 'image/jpeg,image/png'; file.setAttribute('aria-label', t('dc.photo')); box.style.display = 'grid';
+    file.onchange = () => {
+      const f = file.files && file.files[0]; if (!f) return; msg.textContent = t('dc.uploading');
+      resizeImage(f, 480, b64 => api('uploadDoc', [s.staffId, 'PHOTO', {}, b64], r => {
+        if (!r.ok) { msg.textContent = errText(r); return; }
+        photoCache = null; go('profile:' + s.staffId);
+      }), () => { msg.textContent = t('err.IMG_TYPE'); });
+    };
+    box.append(h('small', '', t('dc.photo')), file, msg); return box;
+  }
+
+  function downloadDoc(doc, b, msg) {
+    b.disabled = true; msg.textContent = '';
+    api('getDocFile', [doc.id], r => {
+      b.disabled = false;
+      if (!r.ok) { msg.textContent = errText(r); return; }
+      try {
+        const bin = atob(r.b64), bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([bytes], { type: r.mime })), a = document.createElement('a');
+        a.href = url; a.download = r.name; document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch (e) { msg.textContent = t('dc.dlFail') + e.message; }
+    });
+  }
+  function docRow(doc, canEdit, reload, msg) {
+    const r = h('div', 'vrow'), info = h('div'), acts = h('div', 'acts');
+    info.append(h('b', '', doc.fileName), h('small', '', [doc.docType, doc.docNo, doc.expiry ? fmtD(doc.expiry) : '', t('dc.size', doc.sizeKb), t('dc.by', doc.uploadedBy, doc.uploadedAt)].filter(Boolean).join(' · ')));
+    if (doc.isCurrent && doc.kind === 'VISA') acts.append(h('span', 'pill good', t('dc.current')));
+    if (doc.verified) acts.append(h('span', 'pill mute', t('dc.verified')));
+    if (doc.expiry && doc.days !== null && doc.status === 'ACTIVE') acts.append(h('span', 'pill ' + (doc.days < 0 ? 'bad' : doc.days <= 90 ? 'warn' : 'good'), doc.days < 0 ? t('hm.expired') : t('hm.days', doc.days)));
+    const dl = btn(t('dc.download'), 'ghost sm', () => downloadDoc(doc, dl, msg)); acts.append(dl);
+    if (canEdit && doc.status === 'ACTIVE') {
+      const ar = btn(t('dc.archive'), 'ghost sm', () => {
+        if (!ar.dataset.sure) { ar.dataset.sure = '1'; ar.textContent = t('dc.archiveSure'); ar.classList.add('bad'); return; }
+        api('archiveDoc', [doc.id], x => { if (x.ok) reload(); else msg.textContent = errText(x); });
+      });
+      acts.append(ar);
+    }
+    r.append(info, acts); return r;
+  }
+  function uploadForm(kind, s, reload) {
+    const f = h('form', 'upl'), fg = h('div', 'fg'), els = {}, file = h('input'), msg = h('p', 'msg'), go1 = h('button', 'btn main sm', t('dc.upload'));
+    f.autocomplete = 'off'; file.type = 'file'; file.accept = 'application/pdf,.pdf'; go1.type = 'submit'; msg.setAttribute('role', 'alert');
+    DOC_FIELDS[kind].forEach(d => { const i = h('input'); i.type = d[2]; if (d[2] === 'text') i.maxLength = 100; els[d[0]] = i; fg.append(field(t(d[1]), i)); });
+    f.append(fg, field(t('dc.pickPdf'), file));
+    let ver = null;
+    if (kind === 'VISA') { ver = h('input'); ver.type = 'checkbox'; const l = h('label', 'chk'); l.append(ver, h('span', '', t('dc.verifiedLbl'))); f.append(l); }
+    const a = h('div', 'acts'); a.append(go1);
+    f.append(h('p', 'hint', kind === 'VISA' ? t('dc.keepNote') : t('dc.replaceNote')), msg, a);
+    f.onsubmit = e => {
+      e.preventDefault(); msg.textContent = ''; msg.style.color = '';
+      const fl = file.files && file.files[0];
+      if (!fl) { msg.textContent = t('err.FILE_NONE'); return; }
+      if (fl.size > MAX_PDF_BYTES) { msg.textContent = t('err.FILE_BIG'); return; }
+      go1.disabled = true; msg.style.color = 'var(--muted)'; msg.textContent = t('dc.uploading');
+      b64Of(fl, b64 => {
+        const meta = {}; Object.keys(els).forEach(k => meta[k] = els[k].value); if (ver) meta.verified = ver.checked;
+        api('uploadDoc', [s.staffId, kind, meta, b64], r => {
+          go1.disabled = false; msg.style.color = '';
+          if (!r.ok) { msg.textContent = errText(r); return; }
+          reload(); loadHrData();
+        });
+      }, () => { go1.disabled = false; msg.style.color = ''; msg.textContent = t('err.READ_FAIL'); });
+    };
+    return f;
+  }
+  function docsSection(s, canEdit) {
+    const box = h('section', 'card'), holder = h('div', 'lst'), msg = h('p', 'msg'), reload = () => go('profile:' + s.staffId);
+    msg.setAttribute('role', 'alert'); box.append(h('h2', '', t('dc.title')), msg, holder);
+    api('listDocs', [s.staffId], r => {
+      ['PASSPORT', 'VISA', 'WP', 'HOUSE'].forEach(k => {
+        const sec = h('div', 'lst'), docs = r.docs.filter(d => d.kind === k && d.status === 'ACTIVE');
+        sec.append(h('h2', '', t('dc.' + k)));
+        if (!docs.length) sec.append(h('p', 'meta', t('dc.none')));
+        docs.forEach(d => sec.append(docRow(d, canEdit, reload, msg)));
+        if (canEdit) sec.append(uploadForm(k, s, reload));
+        holder.append(sec);
+      });
+      const old = r.docs.filter(d => d.status === 'ARCHIVED');
+      if (canEdit && old.length) {
+        const det = h('details'); det.append(h('summary', '', t('dc.archived') + ' (' + old.length + ')'));
+        old.forEach(d => det.append(docRow(d, false, reload, msg))); holder.append(det);
+      }
+    });
+    return box;
+  }
+
+  /* ================= เพิ่มครูใหม่ · รีเซ็ตรหัส · ลาออก · รับกลับ ================= */
+  function pwResult(box, password, titleText) {
+    box.textContent = '';
+    const c = h('div', 'ann'); c.append(h('b', '', titleText));
+    if (password) {
+      const cp = btn(t('as.copy'), 'ghost sm', () => { try { navigator.clipboard.writeText(password); cp.textContent = t('as.copied'); } catch (e) {} });
+      c.append(h('small', '', t('as.pwShown')), h('code', 'pwshow', password), cp, h('small', '', t('as.pwNote')));
+    }
+    box.append(c);
+  }
+  function actsOf(b) { const a = h('div', 'acts'); a.append(b); return a; }
+
+  function loadAddStaff() {
+    const wrap = h('div', 'lst'), card = h('form', 'card'), fg = h('div', 'fg'), out = h('div'), msg = h('p', 'msg');
+    card.autocomplete = 'off'; msg.setAttribute('role', 'alert');
+    const idI = inp('asId', 30, true), nameI = inp('asName', 100, true), mailI = inp('asMail', 150), pwI = inp('asPw', 100);
+    pwI.autocomplete = 'off'; idI.autocapitalize = 'none';
+    fg.append(field(t('as.id'), idI), field(t('as.name'), nameI), field(t('as.email'), mailI), field(t('as.pw'), pwI));
+    const go1 = h('button', 'btn main sm', t('as.create')); go1.type = 'submit';
+    card.append(h('h2', '', t('as.title')), fg, h('p', 'hint', t('as.hint')), msg, actsOf(go1));
+    card.onsubmit = e => {
+      e.preventDefault(); msg.textContent = ''; go1.disabled = true;
+      api('addStaff', [{ userId: idI.value, name: nameI.value, email: mailI.value, password: pwI.value }], r => {
+        go1.disabled = false;
+        if (!r.ok) { msg.textContent = errText(r); return; }
+        card.hidden = true; pwResult(out, r.password, t('as.done') + ' · ' + r.userId);
+        out.append(btn(t('as.next'), 'main sm', () => go('profile:' + r.userId)));
+      });
+    };
+    wrap.append(h('h2', 'pageh', t('nav.addStaff')), card, out); $('content').replaceChildren(wrap);
+  }
+
+  function accountSection(s) {
+    const box = h('section', 'card'), msg = h('p', 'msg'), out = h('div'), grid = h('div', 'lst');
+    msg.setAttribute('role', 'alert'); box.append(h('h2', '', t('ac.title')), msg, grid, out);
+    const note = (text, warn) => { msg.textContent = text; msg.style.color = warn ? 'var(--warn)' : ''; };
+    // รีเซ็ตรหัสผ่าน
+    const pw = h('input'); pw.type = 'text'; pw.autocomplete = 'off';
+    const rb = btn(t('ac.reset'), 'ghost sm', () => {
+      note('');
+      api('resetStaffPin', [s.staffId, pw.value], r => { if (!r.ok) { note(errText(r)); return; } pw.value = ''; pwResult(out, r.password, t('ac.resetDone')); });
+    });
+    const r1 = h('div', 'upl'); r1.append(field(t('ac.resetNote'), pw), actsOf(rb));
+    // ลาออก
+    const dt = h('input'), why = h('textarea'), td = bkkToday(); let sure = false, force = false;
+    dt.type = 'date'; dt.value = td.y + '-' + pad2(td.m + 1) + '-' + pad2(td.d); why.rows = 2; why.maxLength = 500;
+    const xb = btn(t('ac.resign'), 'bad', () => {
+      note('');
+      if (!sure) { sure = true; xb.textContent = t('ac.confirm'); note(t('ac.resignNote'), true); return; }
+      api('resignStaff', [s.staffId, dt.value, why.value, force], r => {
+        if (r.ok) { go('former'); return; }
+        if (r.code === 'PENDING_WORK') { force = true; note(t('ac.pending', r.pending), true); return; }
+        note(errText(r));
+      });
+    });
+    const r2 = h('div', 'upl'); r2.append(field(t('ac.resignDate'), dt), field(t('ac.reason'), why), actsOf(xb));
+    grid.append(r1, r2); return box;
+  }
+
+  function loadFormer() {
+    api('listFormerStaff', [], r => {
+      const wrap = h('div', 'lst'); wrap.append(h('h2', 'pageh', t('fm.title')));
+      if (!r.former.length) wrap.append(h('div', 'card empty', t('fm.empty')));
+      r.former.forEach(f => {
+        const c = h('div', 'card item'), top = h('div', 'itop'), out = h('div'), msg = h('p', 'msg'), acts = h('div', 'acts');
+        msg.setAttribute('role', 'alert');
+        top.append(h('b', '', f.name), h('span', 'pill bad', f.resignDate ? t('ac.resigned', fmtD(f.resignDate)) : t('fm.noDate')));
+        c.append(top);
+        if (f.reason) c.append(h('div', 'meta', f.reason));
+        if (f.recordedBy) c.append(h('small', '', t('fm.by', f.recordedBy)));
+        acts.append(btn(t('fm.open'), 'ghost sm', () => go('profile:' + f.staffId)));
+        if (r.canManage) {
+          const pw = h('input'); pw.type = 'text'; pw.placeholder = t('fm.reinNote'); pw.autocomplete = 'off'; pw.style.maxWidth = '260px';
+          const rb = btn(t('fm.reinstate'), 'ghost sm', () => {
+            if (!rb.dataset.sure) { rb.dataset.sure = '1'; rb.textContent = t('fm.reinSure'); rb.classList.add('bad'); return; }
+            api('reinstateStaff', [f.staffId, pw.value], x => {
+              if (!x.ok) { msg.textContent = errText(x); return; }
+              c.textContent = ''; c.append(h('b', '', f.name)); pwResult(out, x.password, t('fm.reinDone')); c.append(out);
+            });
+          });
+          acts.append(pw, rb);
+        }
+        c.append(msg, acts); wrap.append(c);
+      });
+      $('content').replaceChildren(wrap);
+    });
+  }
+
+  /* ================= สถิติวันทำงาน · ที่อยู่อาศัย · ออก-เข้าประเทศ (ตม.30) ================= */
+  const ATT = ['ABSENT', 'PERSONAL_LEAVE', 'SICK_LEAVE', 'LATE'];
+  const amountText = (k, n) => k === 'LATE' ? t('at.unitMin', n) : t('at.unitDays', n);
+  const isoToday = () => { const d = bkkToday(); return d.y + '-' + pad2(d.m + 1) + '-' + pad2(d.d); };
+  function evText(e) {
+    if (e.kind === 'exit') return t('ev.exit', e.name);
+    if (e.kind === 'return') return t('ev.return', e.name);
+    return t('ev.exp', t('ty.' + e.kind), e.name);
+  }
+  function selectOf(options, value) {
+    const s = h('select'); options.forEach(o => { const op = h('option', '', o[1]); op.value = o[0]; s.append(op); });
+    if (value !== undefined) s.value = value; return s;
+  }
+  function plainTable(head, rows) {
+    const w = h('div', 'scroll'), tb = h('table'), hd = h('tr'), body = h('tbody'), th = h('thead');
+    head.forEach(x => hd.append(h('th', '', x))); th.append(hd); tb.append(th);
+    rows.forEach(r => { const tr = h('tr'); r.forEach((c, i) => { const td = h('td', i ? '' : 'nm'); if (c instanceof Node) td.append(c); else td.textContent = c; tr.append(td); }); body.append(tr); });
+    tb.append(body); w.append(tb); return w;
+  }
+
+  /* --- สถิติวันทำงาน --- */
+  function attendanceForm(teachers, after) {
+    const f = h('form', 'card'), fg = h('div', 'fg'), msg = h('p', 'msg'), dt = h('input'), amt = h('input'), note = inp('atNote', 300);
+    const who = selectOf(teachers.map(x => [x.id, x.name])), kind = selectOf(ATT.map(k => [k, t('at.type.' + k)]));
+    f.autocomplete = 'off'; msg.setAttribute('role', 'alert'); dt.type = 'date'; dt.value = isoToday(); amt.type = 'number'; amt.min = '0.5'; amt.step = '0.5'; amt.value = '1';
+    const amtField = field(t('at.days'), amt);
+    kind.onchange = () => {
+      const late = kind.value === 'LATE'; amtField.firstChild.textContent = t(late ? 'at.mins' : 'at.days');
+      amt.step = late ? '1' : '0.5'; amt.min = late ? '1' : '0.5'; amt.value = late ? '15' : '1';
+    };
+    fg.append(field(t('at.teacher'), who), field(t('at.date'), dt), field(t('at.kind'), kind), amtField, field(t('at.note'), note));
+    const go1 = h('button', 'btn main sm', t('at.save')); go1.type = 'submit';
+    f.append(h('h2', '', t('at.add')), fg, msg, actsOf(go1));
+    f.onsubmit = e => {
+      e.preventDefault(); msg.textContent = ''; go1.disabled = true;
+      api('recordAttendance', [{ staffId: who.value, date: dt.value, type: kind.value, amount: amt.value, note: note.value }], r => {
+        go1.disabled = false; if (!r.ok) { msg.textContent = errText(r); return; } after();
+      });
+    };
+    return f;
+  }
+  function loadAttendance(from, to) {
+    api('getAttendance', [from || '', to || '', ''], r => {
+      const wrap = h('div', 'lst'), flt = h('div', 'card'), fg = h('div', 'fg'), fi = h('input'), ti = h('input'), bt = h('div', 'acts');
+      const again = () => loadAttendance(fi.value, ti.value);
+      fi.type = 'date'; ti.type = 'date'; fi.value = from || ''; ti.value = to || '';
+      fg.append(field(t('at.from'), fi), field(t('at.to'), ti));
+      bt.append(btn(t('at.all'), 'ghost sm', () => loadAttendance('', '')),
+        btn(t('at.month'), 'ghost sm', () => { const d = bkkToday(); loadAttendance(d.y + '-' + pad2(d.m + 1) + '-01', isoToday()); }),
+        btn(t('at.apply'), 'main sm', again));
+      flt.append(fg, bt);
+      const sum = h('section', 'card'); sum.append(h('h2', '', t('at.summary')));
+      if (!r.summary.length) sum.append(h('p', 'empty', t('sf.empty')));
+      else sum.append(plainTable([t('col.teacher')].concat(ATT.map(k => t('at.type.' + k))),
+        r.summary.map(x => [x.name].concat(ATT.map(k => x[k].n ? t('at.cell', x[k].n, amountText(k, x[k].sum)) : '–')))));
+      wrap.append(h('h2', 'pageh', t('nav.attend')), flt, sum);
+      if (r.canEdit) wrap.append(attendanceForm(r.teachers, again));
+      const rec = h('section', 'card'), msg = h('p', 'msg'); rec.append(h('h2', '', t('at.records')), msg);
+      if (!r.records.length) rec.append(h('p', 'empty', t('at.none')));
+      r.records.forEach(x => {
+        const row = h('div', 'vrow'), info = h('div'), acts = h('div', 'acts');
+        info.append(h('b', '', x.name), h('small', '', [fmtD(x.date), t('at.type.' + x.type), amountText(x.type, x.amount), x.note, t('at.by', x.recordedBy)].filter(Boolean).join(' · ')));
+        if (r.canEdit) {
+          const v = btn(t('at.void'), 'ghost sm', () => {
+            if (!v.dataset.sure) { v.dataset.sure = '1'; v.textContent = t('at.voidSure'); v.classList.add('bad'); return; }
+            api('voidAttendance', [x.id], z => { if (z.ok) again(); else msg.textContent = errText(z); });
+          });
+          acts.append(v);
+        }
+        row.append(info, acts); rec.append(row);
+      });
+      wrap.append(rec); $('content').replaceChildren(wrap);
+    });
+  }
+  function attendanceCard(s) {
+    const c = h('section', 'card'), box = h('div', 'chips');
+    c.append(h('h2', '', t('nav.attend')), box);
+    api('getAttendance', ['', '', s.staffId], r => {
+      const x = r.summary[0];
+      ATT.forEach(k => { const v = x ? x[k] : { n: 0, sum: 0 }; box.append(h('span', '', t('at.type.' + k) + ': ' + (v.n ? t('at.cell', v.n, amountText(k, v.sum)) : '0'))); });
+    });
+    return c;
+  }
+
+  /* --- ที่อยู่อาศัย --- */
+  function loadAddresses() {
+    api('getAddresses', [], r => {
+      const wrap = h('div', 'lst'), card = h('section', 'card');
+      const rows = r.rows.map(x => {
+        const b = btn(x.name, 'ghost sm', () => go('profile:' + x.staffId)); b.style.textAlign = 'left';
+        return [b, h('span', 'pill ' + (x.type === 'ON' ? 'good' : x.type === 'OFF' ? 'warn' : 'mute'), x.type === 'ON' ? t('ad.on') : x.type === 'OFF' ? t('ad.off') : t('ad.none')),
+          (x.type === 'ON' ? x.houseNo : x.addressText) || '–', x.hasDoc ? '✓' : '–'];
+      });
+      card.append(rows.length ? plainTable([t('col.teacher'), t('ad.type'), t('ad.where'), t('ad.docs')], rows) : h('p', 'empty', t('sf.empty')));
+      wrap.append(h('h2', 'pageh', t('nav.addr')), card); $('content').replaceChildren(wrap);
+    });
+  }
+  function addressSection(s) {
+    const c = h('section', 'card'), body = h('div'); c.append(h('h2', '', t('ad.title')), body);
+    api('getAddress', [s.staffId], r => {
+      if (!r.ok) { body.append(h('p', 'msg', errText(r))); return; }
+      const a = r.address, label = a.type === 'ON' ? t('ad.on') : a.type === 'OFF' ? t('ad.off') : t('ad.none');
+      if (!r.canEdit) {
+        const dl = h('dl', 'dl'); dl.append(h('dt', '', t('ad.type')), h('dd', '', label));
+        if (a.type === 'ON') dl.append(h('dt', '', t('ad.house')), h('dd', '', a.houseNo || '–'));
+        if (a.type === 'OFF') dl.append(h('dt', '', t('ad.addr')), h('dd', '', a.addressText || '–'), h('dt', '', t('ad.landlord')), h('dd', '', a.landlord || '–'), h('dt', '', t('ad.phone')), h('dd', '', a.phone || '–'));
+        body.append(dl); return;
+      }
+      const f = h('form'), msg = h('p', 'msg'), onBox = h('div'), offBox = h('div'), addr = h('textarea'), land = inp('adLand', 150), ph = inp('adPhone', 50), save = h('button', 'btn main sm', t('ad.save'));
+      const type = selectOf([['', t('ad.none')], ['ON', t('ad.on')], ['OFF', t('ad.off')]], a.type);
+      let house;
+      if (r.houses.length) house = selectOf([['', t('ad.pick')]].concat(r.houses.map(x => [x.houseNo, x.houseNo + (x.occupants.length ? ' — ' + t('ad.occupied', x.occupants.join(', ')) : '')])), a.houseNo);
+      else { house = h('input'); house.type = 'text'; house.maxLength = 50; house.value = a.houseNo; }
+      addr.rows = 3; addr.maxLength = 500; addr.value = a.addressText; land.value = a.landlord; ph.value = a.phone; save.type = 'submit'; msg.setAttribute('role', 'alert');
+      onBox.append(field(t('ad.house'), house)); if (!r.houses.length) onBox.append(h('p', 'hint', t('ad.noList')));
+      offBox.append(field(t('ad.addr'), addr), field(t('ad.landlord'), land), field(t('ad.phone'), ph));
+      const sync = () => { onBox.hidden = type.value !== 'ON'; offBox.hidden = type.value !== 'OFF'; }; type.onchange = sync; sync();
+      f.append(field(t('ad.type'), type), onBox, offBox, msg, actsOf(save));
+      f.onsubmit = e => {
+        e.preventDefault(); msg.textContent = ''; msg.style.color = ''; save.disabled = true;
+        api('saveAddress', [{ staffId: s.staffId, type: type.value, houseNo: house.value, addressText: addr.value, landlord: land.value, phone: ph.value }], x => {
+          save.disabled = false; if (!x.ok) { msg.textContent = errText(x); return; } msg.style.color = 'var(--good)'; msg.textContent = t('pf.saved'); loadHrData();
+        });
+      };
+      body.append(f);
+    });
+    return c;
+  }
+
+  /* --- ออก-เข้าประเทศ + ลงที่พัก (ตม.30) --- */
+  function tripsSection(s) {
+    const c = h('section', 'card'), list = h('div', 'lst'), msg = h('p', 'msg'), reload = () => { go('profile:' + s.staffId); loadHrData(); };
+    msg.setAttribute('role', 'alert'); c.append(h('h2', '', t('tr.title')), msg, list);
+    api('listTrips', [s.staffId], r => {
+      let editing = null, exitI, backI, noteI, form;
+      if (!r.trips.length) list.append(h('p', 'meta', t('tr.none')));
+      r.trips.forEach(x => {
+        const row = h('div', 'vrow'), info = h('div'), acts = h('div', 'acts');
+        info.append(h('b', '', fmtD(x.exitDate) + ' → ' + (x.returnDate ? fmtD(x.returnDate) : t('tr.abroad'))), h('small', '', x.note));
+        const p = !x.returnDate ? ['mute', t('tr.wait')] : x.tm30Done ? ['good', t('tr.done', fmtD(x.tm30Date))] : ['bad', t('tr.pending')];
+        acts.append(h('span', 'pill ' + p[0], p[1]));
+        if (r.canEdit) {
+          if (x.returnDate && !x.tm30Done) {
+            const di = h('input'); di.type = 'date'; di.value = isoToday(); di.setAttribute('aria-label', t('tr.markDate'));
+            acts.append(di, btn(t('tr.mark'), 'main sm', () => api('markTm30', [x.id, di.value], z => { if (z.ok) reload(); else msg.textContent = errText(z); })));
+          }
+          acts.append(btn(t('tr.edit'), 'ghost sm', () => { editing = x; exitI.value = x.exitDate; backI.value = x.returnDate; noteI.value = x.note; form.scrollIntoView({ block: 'nearest' }); }));
+          const v = btn(t('at.void'), 'ghost sm', () => {
+            if (!v.dataset.sure) { v.dataset.sure = '1'; v.textContent = t('at.voidSure'); v.classList.add('bad'); return; }
+            api('voidTrip', [x.id], z => { if (z.ok) reload(); else msg.textContent = errText(z); });
+          });
+          acts.append(v);
+        }
+        row.append(info, acts); list.append(row);
+      });
+      if (r.canEdit) {
+        form = h('form', 'upl'); exitI = h('input'); backI = h('input'); noteI = inp('trNote', 300); exitI.type = 'date'; backI.type = 'date';
+        const fg = h('div', 'fg'), sv = h('button', 'btn main sm', t('tr.save')); sv.type = 'submit';
+        fg.append(field(t('tr.exit'), exitI), field(t('tr.return'), backI), field(t('tr.note'), noteI)); form.append(fg, actsOf(sv));
+        form.onsubmit = e => {
+          e.preventDefault(); msg.textContent = ''; sv.disabled = true;
+          api('saveTrip', [{ id: editing ? editing.id : '', staffId: s.staffId, exitDate: exitI.value, returnDate: backI.value, note: noteI.value }], z => {
+            sv.disabled = false; if (!z.ok) { msg.textContent = errText(z); return; } reload();
+          });
+        };
+        list.append(form);
+      }
+    });
+    return c;
+  }
+
+  /* นาฬิกา GMT+7 + เวลาที่อยู่ในระบบ */
+  function tick() {
+    const now = new Date();
+    $('clkDate').textContent = now.toLocaleDateString(loc(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' });
+    $('clkTime').textContent = now.toLocaleTimeString(loc(), { hour12: false, timeZone: 'Asia/Bangkok' }); setGreeting();
+    if (t0) { const s = Math.max(0, Math.floor((Date.now() - t0) / 1000)); $('sess').textContent = [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(pad2).join(':'); }
+  }
+  setInterval(tick, 1000); tick();
+
+  applyStatic();
+  token = loadTok();
+  if (token) { try { t0 = Number(sessionStorage.getItem('rav_t0')) || null; } catch (e) {} loadApp(); } else toLogin();
+</script>
+</body>
+</html>
